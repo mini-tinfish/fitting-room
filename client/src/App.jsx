@@ -20,6 +20,7 @@ import lookbookLabel from './assets/navigation/lookbook.png'
 import myWeekLabel from './assets/navigation/my_week.png'
 import styleMeLabel from './assets/navigation/style_me.png'
 import myClosetLabel from './assets/navigation/my_closet.png'
+import flowerDecor from './assets/branding/flower_decor.png'
 import myClosetIcon from './assets/navigation/my_closet_icon.png'
 import styleMeIcon from './assets/navigation/style_me_icon.png'
 import myWeekIcon from './assets/navigation/my_week_icon.png'
@@ -34,6 +35,20 @@ const tabs = [
 ]
 
 const emptyDraft = { mode: 'separates', picks: {}, accessories: [], editingPlan: null, planDate: null }
+
+// Each page's small heading and Procreate title artwork, with the floral flourish
+// at the right, spanning from the top of the heading to the bottom of the title.
+function PageTitle({ eyebrow, src, alt }) {
+  return (
+    <div className="page-heading">
+      <p className="eyebrow">{eyebrow}</p>
+      <h2 className="page-title">
+        <img src={src} alt={alt} className="page-title-image" />
+      </h2>
+      <img src={flowerDecor} alt="" className="page-title-decor" />
+    </div>
+  )
+}
 
 function App() {
   const [activeTab, setActiveTab] = useState('closet')
@@ -166,14 +181,7 @@ function App() {
       <main className="app-main">
         {activeTab === 'closet' && (
           <section className="page">
-            <p className="eyebrow">WELCOME TO YOUR WARDROBE</p>
-            <h2 className="page-title">
-  <img
-    src={myClosetLabel}
-    alt="My Closet"
-    className="page-title-image"
-  />
-</h2>
+            <PageTitle eyebrow="WELCOME TO YOUR WARDROBE" src={myClosetLabel} alt="My Closet" />
             <p>All your favorite pieces, in one little place.</p>
 
             {whenLoaded(<MyCloset clothes={closet} setClothes={setCloset} />)}
@@ -182,14 +190,7 @@ function App() {
 
         {activeTab === 'style' && (
           <section className="page">
-            <p className="eyebrow">LET'S GET DRESSED</p>
-            <h2 className="page-title">
-  <img
-    src={styleMeLabel}
-    alt="Style Me"
-    className="page-title-image"
-  />
-</h2>
+            <PageTitle eyebrow="LET'S GET DRESSED" src={styleMeLabel} alt="Style Me" />
             <p>Ask Darling for a look, pick a vibe, or flip through your pieces.</p>
 
             {whenLoaded(
@@ -209,14 +210,7 @@ function App() {
 
         {activeTab === 'saved' && (
           <section className="page">
-            <p className="eyebrow">THE LOOKBOOK</p>
-            <h2 className="page-title">
-  <img
-    src={lookbookLabel}
-    alt="Lookbook"
-    className="page-title-image"
-  />
-</h2>
+            <PageTitle eyebrow="THE LOOKBOOK" src={lookbookLabel} alt="Lookbook" />
             <p>Keep the outfits you love.</p>
 
             {/* The Lookbook shows its own empty state only when nothing is saved. */}
@@ -236,14 +230,7 @@ function App() {
         
 {activeTab === 'planner' && (
   <section className="page">
-    <p className="eyebrow">YOUR WEEKLY LOOKBOOK</p>
-    <h2 className="page-title">
-  <img
-    src={myWeekLabel}
-    alt="My Week"
-    className="page-title-image"
-  />
-</h2>
+    <PageTitle eyebrow="YOUR WEEKLY LOOKBOOK" src={myWeekLabel} alt="My Week" />
     <p>Seven days, seven looks. Plan what to wear!</p>
 
     {whenLoaded(

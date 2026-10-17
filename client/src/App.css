@@ -257,14 +257,32 @@ h1 {
 
 
 /* Original Procreate pixel-cursive page headings */
+/* Small heading + title on the left, Procreate flowers on the right. */
+.page-heading {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 14px;
+}
+
+.page-heading > .eyebrow,
+.page-heading > .page-title {
+  grid-column: 1;
+}
+
 .page-title {
   margin: 12px 0 20px;
   display: flex;
   align-items: center;
 }
 
+/* min-width: 0 lets the title give up a little width on narrow phones
+   (object-fit keeps its proportions) instead of pushing the flowers off the page. */
 .page-title-image {
   display: block;
+  flex: 0 1 auto;
+  min-width: 0;
   width: auto;
   max-width: min(100%, 400px);
   height: 80px;
@@ -273,7 +291,56 @@ h1 {
   image-rendering: pixelated;
 }
 
+/* Procreate floral flourish, shown as drawn. On narrow screens it sits beside the title. */
+.page-title-decor {
+  display: block;
+  grid-column: 2;
+  grid-row: 2;
+  width: 84px;
+  height: auto;
+  margin-bottom: 8px;
+}
+
+/* Wider screens: the flowers run from just above the small heading (into the page box's
+   top padding) to the bottom of the heading area, at the right edge. The width follows
+   the artwork's proportions, so taller = longer. */
+@media (min-width: 760px) {
+  .page-title-decor {
+    position: absolute;
+    top: -14px;
+    right: 0;
+    width: auto;
+    height: calc(100% + 14px);
+    margin: 0;
+  }
+}
+
+/* Full-width desktop: bigger still. Rises further into the top padding and reaches a little
+   past the heading, beside the short description line (which stays clear on the left). */
+@media (min-width: 960px) {
+  .page-title-decor {
+    top: -24px;
+    height: calc(100% + 36px);
+  }
+}
+
+/* Phones and small tablets: no flowers. The heading drops to one column
+   so the hidden flowers' column and gap don't take space beside the title. */
+@media (max-width: 768px) {
+  .page-title-decor {
+    display: none;
+  }
+
+  .page-heading {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 480px) {
+  .page-heading {
+    column-gap: 8px;
+  }
+
   .page-title-image {
     max-width: 100%;
     height: 60px;

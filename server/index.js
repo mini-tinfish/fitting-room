@@ -29,10 +29,16 @@ app.get('/api/options', (req, res) => {
   });
 });
 
-// Test route: build an outfit from the sample closet.
-app.get('/api/outfit/test', (req, res) => {
-  const { aesthetic, weather } = req.query;
-  const outfit = pickOutfit(sampleCloset, aesthetic, weather);
+// Real route: the frontend sends the user's closet and choices.
+app.post('/api/outfit', (req, res) => {
+  const { closet, aesthetic, weather } = req.body;
+
+  // Make sure we actually got clothes.
+  if (!Array.isArray(closet) || closet.length === 0) {
+    return res.status(400).json({ error: 'Please send a closet with at least one item.' });
+  }
+
+  const outfit = pickOutfit(closet, aesthetic, weather);
   res.json(outfit);
 });
 

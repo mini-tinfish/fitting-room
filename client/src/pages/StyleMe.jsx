@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { API_URL } from '../api/config';
+import { saveLook } from '../closetStore';
 
 const SLOTS = ['top', 'bottom', 'shoes'];
 
@@ -24,6 +25,7 @@ export default function StyleMe({ closet }) {
   }, []);
 
   function itemsIn(category) {
+    
     return closet.filter((item) => item.category === category);
   }
 
@@ -68,7 +70,16 @@ export default function StyleMe({ closet }) {
       setStatus('Could not get an outfit.');
     }
   }
-
+  // Save whatever the carousel is showing right now.
+  async function handleSaveLook() {
+    const itemIds = {};
+    for (const category of SLOTS) {
+      const item = itemsIn(category)[picks[category]];
+      itemIds[category] = item ? item.id : null;
+    }
+    await saveLook({ itemIds, aesthetic, weather });
+    setStatus('💖 Saved to your Lookbook!');
+  }
   return (
     <div>
       <label>
@@ -88,11 +99,13 @@ export default function StyleMe({ closet }) {
       </label>{' '}
 
       <button onClick={styleMe}>✨ Style me</button>
+        {' '}<button onClick={handleSaveLook}>❤️ Save this look</button>
       <p>{status}</p>
 
       {SLOTS.map((category) => {
         const items = itemsIn(category);
         const item = items[picks[category]];
+       
         return (
           <div key={category} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, margin: '8px 0' }}>
             <button onClick={() => step(category, -1)} disabled={items.length < 2}>◀</button>

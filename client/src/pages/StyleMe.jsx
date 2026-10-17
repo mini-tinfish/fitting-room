@@ -36,6 +36,7 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
   const [saving, setSaving] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [toast, setToast] = useState(null);
+  const [lookName, setLookName] = useState('');
 
   // Ask Darling
   const [request, setRequest] = useState('');
@@ -168,10 +169,13 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
     setSaving(true);
     try {
       const look = { itemIds: normalizeOutfit(currentOutfit), aesthetic, weather };
+            const name = lookName.trim();
+      if (name) look.name = name;
       if (darling && darling.signature === signature) {
         look.darling = { request: darling.request, explanation: darling.result.explanation };
       }
       await onSaveLook(look);
+            setLookName('');
       showToast('💖 Saved to your Lookbook!', 'success', { label: 'See Lookbook', onClick: () => onGoTo('saved') });
     } catch {
       showToast('Could not save this look. Please try again.', 'error');
@@ -540,7 +544,17 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
           <button type="button" className="dr-style-btn" onClick={styleMe} disabled={styling}>
             {styling ? 'Styling…' : '✧ Style Me! ✧'}
           </button>
-
+          <label className="visually-hidden" htmlFor="look-name">Name this look</label>
+          <input
+            id="look-name"
+            type="text"
+            className="dr-textarea dr-look-name"
+            placeholder="Name this look (optional), e.g. Sunday brunch"
+            maxLength={40}
+            value={lookName}
+            onChange={(e) => setLookName(e.target.value)}
+            disabled={outfitEmpty || alreadySaved}
+          />
           <div className="dr-actions">
             <button
               type="button"

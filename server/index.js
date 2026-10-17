@@ -18,7 +18,13 @@ app.get('/api/health', (req, res) => {
     message: 'The Fitting Room backend is running!'
   });
 });
-
+// List of options for the Style Me screen.
+app.get('/api/options', (req, res) => {
+  res.json({
+    occasions: ['Class', 'First date', 'Brunch', 'Party', 'Interview'],
+    aesthetics: ['90s rom-com', 'Clean girl', 'Y2K', 'Dark academia', 'Streetwear'],
+  });
+});
 // TODO: Add Gemini AI outfit recommendations here.
 
 app.listen(PORT, () => {

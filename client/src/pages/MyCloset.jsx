@@ -1,44 +1,14 @@
 
 import { useState } from 'react'
 import './MyCloset.css'
-
-// Temporary sample data.
-// TODO: Replace with real wardrobe data from App.jsx.
-const sampleClothes = [
-  {
-    id: 'top1',
-    name: 'Pink Cardigan',
-    category: 'top',
-    color: 'pink',
-    warmth: 'light',
-    tags: ['coquette', 'casual'],
-    image: '',
-  },
-  {
-    id: 'bottom1',
-    name: 'Plaid Skirt',
-    category: 'bottom',
-    color: 'brown',
-    warmth: 'medium',
-    tags: ['dark academia'],
-    image: '',
-  },
-  {
-    id: 'shoes1',
-    name: 'Mary Janes',
-    category: 'shoes',
-    color: 'black',
-    warmth: 'medium',
-    tags: ['vintage', 'coquette'],
-    image: '',
-  },
-]
+import { addItem, removeItem } from '../closetStore'
 
 const categories = [
   { value: 'all', label: 'All' },
   { value: 'top', label: 'Tops' },
   { value: 'bottom', label: 'Bottoms' },
   { value: 'shoes', label: 'Shoes' },
+  { value: 'accessory', label: 'Accessories' },
 ]
 
 export default function MyCloset({ clothes, setClothes }) {
@@ -47,6 +17,9 @@ export default function MyCloset({ clothes, setClothes }) {
 
 const [showUpload, setShowUpload] = useState(false)
 const [uploadError, setUploadError] = useState('')
+const [saving, setSaving] = useState(false)
+const [removingId, setRemovingId] = useState(null)
+const [closetError, setClosetError] = useState('')
 
 const [newItem, setNewItem] = useState({
   name: '',
@@ -63,14 +36,16 @@ const filteredClothes = clothes.filter((item) => {
 
   const query = search.toLowerCase().trim()
 
+  // Items saved by the older closet screen may have no name, color, or tags.
   const matchesSearch =
-    item.name.toLowerCase().includes(query) ||
-    item.color.toLowerCase().includes(query) ||
+    (item.name || '').toLowerCase().includes(query) ||
+    (item.color || '').toLowerCase().includes(query) ||
     item.category.toLowerCase().includes(query) ||
     (item.category === 'shoes' && query === 'shoe') ||
     (item.category === 'top' && query === 'tops') ||
     (item.category === 'bottom' && query === 'bottoms') ||
-    item.tags.some((tag) => tag.toLowerCase().includes(query))
+    (item.category === 'accessory' && query === 'accessories') ||
+    (item.tags || []).some((tag) => tag.toLowerCase().includes(query))
 
   return matchesCategory && matchesSearch
 })
@@ -107,16 +82,19 @@ function handlePhotoUpload(event) {
   reader.readAsDataURL(file)
 }
 
-function handleSaveClothing(event) {
+async function handleSaveClothing(event) {
   event.preventDefault()
+
+  // Ignore extra clicks while the first save is still running.
+  if (saving) return
 
   if (!newItem.name.trim() || !newItem.image) {
     setUploadError('Please add a name and clothing photo.')
     return
   }
 
+  // addItem() assigns the id, so none is set here.
   const item = {
-    id: crypto.randomUUID(),
     name: newItem.name.trim(),
     category: newItem.category,
     color: newItem.color.trim().toLowerCase(),
@@ -128,7 +106,20 @@ function handleSaveClothing(event) {
     image: newItem.image,
   }
 
-  setClothes((previous) => [...previous, item])
+  setSaving(true)
+  setUploadError('')
+
+  let savedItem
+  try {
+    savedItem = await addItem(item)
+  } catch {
+    setUploadError('Could not save this item. Please try again.')
+    return
+  } finally {
+    setSaving(false)
+  }
+
+  setClothes((previous) => [...previous, savedItem])
 
   setSearch('')
   setCategory('all')
@@ -145,6 +136,22 @@ function handleSaveClothing(event) {
   })
 }
 
+async function handleRemove(id) {
+  if (removingId) return
+
+  setRemovingId(id)
+  setClosetError('')
+
+  try {
+    await removeItem(id)
+    setClothes((previous) => previous.filter((item) => item.id !== id))
+  } catch {
+    setClosetError('Could not remove this item. Please try again.')
+  } finally {
+    setRemovingId(null)
+  }
+}
+
 
   return (
     <div className="closet-window">
@@ -155,10 +162,8 @@ function handleSaveClothing(event) {
 
       <div className="closet-window-content">
         <div className="closet-top-row">
-          <p>{sampleClothes.length} pieces in your closet</p>
+          <p>{clothes.length} pieces in your closet</p>
 
-          {/* TODO: Connect the clothing upload form */}
-          
 <button
   className="closet-add-btn"
   type="button"
@@ -198,28 +203,47 @@ function handleSaveClothing(event) {
             <div className="clothing-card" key={item.id}>
               <div className="clothing-image">
                 {item.image ? (
-                  <img src={item.image} alt={item.name} />
+                  <img src={item.image} alt={item.name || item.category} />
                 ) : (
                   <span aria-hidden="true">👗</span>
                 )}
               </div>
 
-              <h3>{item.name}</h3>
+              <h3>{item.name || item.category}</h3>
               <p>
-                {item.category.toUpperCase()} · {item.color}
+                {item.category.toUpperCase()}
+                {item.color && ` · ${item.color}`}
               </p>
               <div className="clothing-tags">
-                {item.tags.map((tag) => (
+                {(item.tags || []).map((tag) => (
                   <span key={tag}>{tag}</span>
                 ))}
               </div>
+
+              <button
+                className="clothing-remove-btn"
+                type="button"
+                onClick={() => handleRemove(item.id)}
+                disabled={removingId !== null}
+                aria-label={`Remove ${item.name || item.category}`}
+              >
+                {removingId === item.id ? 'Removing…' : 'Remove'}
+              </button>
             </div>
           ))}
         </div>
 
+        {closetError && (
+          <p className="closet-upload-error" role="alert">
+            {closetError}
+          </p>
+        )}
+
         {filteredClothes.length === 0 && (
           <p className="closet-empty">
-            No clothing matches your search. ♡
+            {clothes.length === 0
+              ? 'Your closet is empty. Add your first piece! ♡'
+              : 'No clothing matches your search. ♡'}
           </p>
         )}
       </div>
@@ -297,6 +321,7 @@ function handleSaveClothing(event) {
               <option value="top">Tops</option>
               <option value="bottom">Bottoms</option>
               <option value="shoes">Shoes</option>
+              <option value="accessory">Accessories</option>
             </select>
           </label>
 
@@ -355,8 +380,9 @@ function handleSaveClothing(event) {
         <button
           className="closet-save-btn"
           type="submit"
+          disabled={saving}
         >
-          ♡ Save to Closet
+          {saving ? 'Saving…' : '♡ Save to Closet'}
         </button>
       </form>
     </div>

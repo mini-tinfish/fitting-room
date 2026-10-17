@@ -1,6 +1,7 @@
 
 import MyCloset from './pages/MyCloset'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { getCloset } from './closetStore'
 import './App.css'
 import fittingRoomTitle from './assets/branding/fitting-room-title.png'
 import lookbookLabel from './assets/navigation/lookbook.png'
@@ -24,12 +25,42 @@ const tabs = [
 function App() {
   const [activeTab, setActiveTab] = useState('closet')
   const [closet, setCloset] = useState([])
+  const [closetLoading, setClosetLoading] = useState(true)
+  const [closetError, setClosetError] = useState('')
   const [occasion] = useState('')
   const [aesthetic] = useState('')
   const [weather] = useState('')
   const [loading, setLoading] = useState(false)
   const [recommendedIds, setRecommendedIds] = useState([])
   const [stylistNote, setStylistNote] = useState('')
+
+  // Read saved clothes from IndexedDB. This only reads, so it never overwrites stored data.
+  function fetchCloset(isCancelled = () => false) {
+    getCloset()
+      .then((items) => {
+        if (!isCancelled()) setCloset(items)
+      })
+      .catch(() => {
+        if (!isCancelled()) setClosetError('Could not load your saved clothes.')
+      })
+      .finally(() => {
+        if (!isCancelled()) setClosetLoading(false)
+      })
+  }
+
+  useEffect(() => {
+    let cancelled = false
+    fetchCloset(() => cancelled)
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  function retryLoadCloset() {
+    setClosetLoading(true)
+    setClosetError('')
+    fetchCloset()
+  }
 
   async function handleStyleMe() {
     setLoading(true);
@@ -39,8 +70,8 @@ function App() {
       setStylistNote(result.stylistComment);
     } catch {
       // Fallback logic: Pick 1 Top, 1 Bottom, and 1 Pair of Shoes randomly from closet
-      const fallbackTop = closet.find(i => i.category === 'tops')?.id;
-      const fallbackBottom = closet.find(i => i.category === 'bottoms')?.id;
+      const fallbackTop = closet.find(i => i.category === 'top')?.id;
+      const fallbackBottom = closet.find(i => i.category === 'bottom')?.id;
       const fallbackShoes = closet.find(i => i.category === 'shoes')?.id;
 
       setRecommendedIds([fallbackTop, fallbackBottom, fallbackShoes].filter(Boolean));
@@ -88,7 +119,21 @@ function App() {
 </h2>
             <p>All your favorite pieces, in one little place.</p>
 
-            <MyCloset clothes={closet} setClothes={setCloset} />
+            {/* Wait for the saved closet so new items can't race the initial load. */}
+            {closetLoading ? (
+              <div className="placeholder-card">
+                <p>Opening your wardrobe…</p>
+              </div>
+            ) : closetError ? (
+              <div className="placeholder-card" role="alert">
+                <p>{closetError}</p>
+                <button type="button" onClick={retryLoadCloset}>
+                  Try again
+                </button>
+              </div>
+            ) : (
+              <MyCloset clothes={closet} setClothes={setCloset} />
+            )}
           </section>
         )}
 

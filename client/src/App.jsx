@@ -13,6 +13,7 @@ import styleMeIcon from './assets/navigation/style_me_icon.png'
 import myWeekIcon from './assets/navigation/my_week_icon.png'
 import lookbookIcon from './assets/navigation/lookbook_icon.png'
 import { getOutfitRecommendation } from './api/stylist'
+  import StyleMeCarousel from './pages/StyleMe';
 
 const tabs = [
   { id: 'closet', label: 'My Closet', icon: '👚', image: myClosetLabel, iconImage: myClosetIcon },
@@ -166,6 +167,7 @@ function App() {
                 </ul>
               )}
             </div>
+               <StyleMeCarousel />
           </section>
         )}
 

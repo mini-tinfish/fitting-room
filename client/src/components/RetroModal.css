@@ -1,0 +1,208 @@
+/* Shared retro pop-up window, matching the Add Clothing window in MyCloset.css. */
+
+.od-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(45, 31, 42, 0.55);
+}
+
+.od-modal {
+  width: min(100%, 460px);
+  max-height: 90dvh;
+  overflow-y: auto;
+  background: #fffaf7;
+  border: 2px solid #d6a8bf;
+  border-radius: 14px;
+  box-shadow: 7px 7px 0 #bd98ab;
+  color: var(--plum);
+}
+
+.od-modal:focus {
+  outline: none;
+}
+
+.od-modal-wide {
+  width: min(100%, 620px);
+}
+
+.od-modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #efc9dc;
+  color: var(--plum);
+  letter-spacing: 0.5px;
+}
+
+.od-modal-header button {
+  border: 0;
+  background: transparent;
+  color: var(--plum);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.od-modal-body {
+  padding: 20px;
+}
+
+/* Form pieces used inside the pop-ups */
+
+.od-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.od-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #593a50;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.od-field input,
+.od-field textarea {
+  width: 100%;
+  padding: 11px 12px;
+  background: white;
+  border: 1px solid #dec5d1;
+  border-radius: 9px;
+  color: var(--plum);
+  font: inherit;
+  font-weight: 400;
+}
+
+.od-field textarea {
+  resize: vertical;
+  min-height: 64px;
+}
+
+.od-field-hint {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.od-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.od-chip {
+  padding: 7px 12px;
+  border: 1px solid #e2c5d4;
+  border-radius: 20px;
+  background: #fff1f7;
+  color: #65455a;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.od-chip[aria-pressed='true'] {
+  background: #e9bfd4;
+  border-color: #c58ca8;
+  color: var(--plum);
+  font-weight: 700;
+}
+
+.od-primary-btn,
+.od-secondary-btn {
+  padding: 12px 16px;
+  border-radius: 10px;
+  color: var(--plum);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.od-primary-btn {
+  background: #e9bfd4;
+  border: 1px solid #c58ca8;
+  box-shadow: 3px 3px 0 #d3a9bf;
+}
+
+.od-secondary-btn {
+  background: #fff;
+  border: 1px solid #dcb9cb;
+}
+
+.od-primary-btn:disabled,
+.od-secondary-btn:disabled,
+.od-chip:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.od-error {
+  margin: 0;
+  color: #a33152;
+  font-size: 0.85rem;
+}
+
+/* Small outfit preview: one thumbnail per piece */
+
+.od-outfit-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.od-outfit-thumb {
+  width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.od-outfit-thumb-image {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8eef2;
+  border: 1px solid #ead4df;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.od-outfit-thumb-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.od-outfit-thumb-missing {
+  border-style: dashed;
+  font-size: 1.1rem;
+}
+
+.od-fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.od-fieldset legend {
+  margin-bottom: 7px;
+  padding: 0;
+}

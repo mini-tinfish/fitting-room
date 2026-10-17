@@ -1,11 +1,11 @@
-import { get, set, update } from 'idb-keyval';
+import { get, update } from 'idb-keyval';
 const KEY = 'closet';
 
 // Make an id that won't collide, even for two items saved in the same millisecond.
 // crypto.randomUUID only exists on https/localhost, so fall back elsewhere (e.g. phone on LAN).
-function makeId() {
-  if (globalThis.crypto?.randomUUID) return `item-${crypto.randomUUID()}`;
-  return `item-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+function makeId(prefix = 'item') {
+  if (globalThis.crypto?.randomUUID) return `${prefix}-${crypto.randomUUID()}`;
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 // Get every item in the closet (empty list if none yet).
@@ -34,13 +34,43 @@ export async function getLooks() {
 }
 
 export async function saveLook(look) {
-  const looks = await getLooks();
-  const newLook = { ...look, id: `look-${Date.now()}`, savedAt: new Date().toISOString() };
-  await set(LOOKS_KEY, [...looks, newLook]);
+  const newLook = { ...look, id: makeId('look'), savedAt: new Date().toISOString() };
+  await update(LOOKS_KEY, (looks = []) => [...looks, newLook]);
   return newLook;
 }
 
 export async function removeLook(id) {
-  const looks = await getLooks();
-  await set(LOOKS_KEY, looks.filter((look) => look.id !== id));
+  await update(LOOKS_KEY, (looks = []) => looks.filter((look) => look.id !== id));
+}
+
+// ---------- Planned outfits (My Week) ----------
+// Kept apart from Lookbook favorites: a plan is an outfit pinned to a calendar date.
+// Plans for dates outside the visible week stay stored until they are removed.
+const PLANS_KEY = 'plans';
+
+export async function getPlans() {
+  return (await get(PLANS_KEY)) || [];
+}
+
+export async function addPlan(plan) {
+  const newPlan = { ...plan, id: makeId('plan'), createdAt: new Date().toISOString() };
+  await update(PLANS_KEY, (plans = []) => [...plans, newPlan]);
+  return newPlan;
+}
+
+// Returns the updated plan, or null if it no longer exists.
+export async function updatePlan(id, changes) {
+  let updated = null;
+  await update(PLANS_KEY, (plans = []) =>
+    plans.map((plan) => {
+      if (plan.id !== id) return plan;
+      updated = { ...plan, ...changes, id, updatedAt: new Date().toISOString() };
+      return updated;
+    })
+  );
+  return updated;
+}
+
+export async function removePlan(id) {
+  await update(PLANS_KEY, (plans = []) => plans.filter((plan) => plan.id !== id));
 }

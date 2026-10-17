@@ -1,0 +1,274 @@
+/* My Week: the existing day strip (.week-grid / .day-card in App.css) on top,
+   and a corkboard of pinned outfit cards for each day underneath. */
+
+.my-week .day-card {
+  position: relative;
+  font: inherit;
+  cursor: pointer;
+}
+
+.my-week .day-card.is-today {
+  border: 2px solid #c58ca8;
+}
+
+.my-week .day-card.has-plans {
+  background: #fff;
+}
+
+.day-card-thumb {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.day-card-empty {
+  opacity: 0.35;
+}
+
+.day-card-count {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 1px 5px;
+  background: #e9bfd4;
+  border-radius: 999px;
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.week-message {
+  margin: 16px 0 0;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid #ead4df;
+  border-radius: 10px;
+  color: var(--plum);
+  font-size: 0.85rem;
+}
+
+/* Corkboard */
+.week-board {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 16px;
+  background-color: #f3e2d3;
+  background-image: radial-gradient(rgba(150, 105, 80, 0.16) 1px, transparent 1px);
+  background-size: 9px 9px;
+  border: 6px solid #d9b99f;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1px #c9a283;
+}
+
+.week-day {
+  scroll-margin-top: 16px;
+}
+
+.week-day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.week-day-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--plum);
+}
+
+.week-day-header h3 span {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+
+.week-day-empty {
+  margin: 0;
+  color: #8a6f6a;
+  font-size: 0.8rem;
+}
+
+.week-day-plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.plan-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 14px 12px;
+  background: #fffaf7;
+  border: 1px solid #ead4df;
+  border-radius: 6px;
+  box-shadow: 3px 4px 0 rgba(73, 51, 73, 0.12);
+  transform: rotate(-0.6deg);
+}
+
+.plan-card:nth-child(even) {
+  transform: rotate(0.6deg);
+}
+
+.plan-pin {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle at 35% 35%, #f7c6da, #c25a86);
+  border-radius: 50%;
+  box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.25);
+  transform: translateX(-50%);
+}
+
+.plan-date {
+  color: #a06b87;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.plan-title {
+  font-size: 0.95rem;
+}
+
+.plan-preview {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.plan-names {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.week-notes {
+  margin: 0;
+  padding: 6px 8px;
+  background: #fff6c9;
+  border-radius: 4px;
+  color: #6b5a3a;
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+}
+
+.week-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+}
+
+.week-card-actions .od-chip {
+  padding: 5px 10px;
+  font-size: 0.72rem;
+}
+
+.week-later {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid #ead4df;
+  border-radius: 12px;
+}
+
+.week-later summary {
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.week-later .week-day-empty {
+  margin: 8px 0 12px;
+}
+
+/* Pop-up pieces */
+.week-look-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.week-look-option {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #ead4df;
+  border-radius: 12px;
+  color: var(--plum);
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.week-look-option:hover {
+  border-color: #c58ca8;
+}
+
+.week-view-pieces {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.week-view-piece {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+}
+
+.week-view-image {
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 2px dashed #e8bfd2;
+  border-radius: 12px;
+  color: var(--text-muted);
+}
+
+.week-view-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+@media (max-width: 480px) {
+  .week-board {
+    padding: 10px;
+    border-width: 4px;
+  }
+
+  .day-card-thumb {
+    width: 24px;
+    height: 24px;
+  }
+
+  .week-day-plans {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plan-card,
+  .plan-card:nth-child(even) {
+    transform: none;
+  }
+}

@@ -305,3 +305,87 @@
     padding: 16px;
   }
 }
+
+.closet-field-hint {
+  color: #806f7e;
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+/* Background removal: checkerboard shows the see-through parts of the cut-out. */
+.closet-photo-upload img.closet-photo-transparent {
+  background: repeating-conic-gradient(#f1dbe6 0 25%, #fffaf7 0 50%) 0 0 / 16px 16px;
+  border-radius: 8px;
+}
+
+.closet-photo-upload img.closet-photo-processing {
+  opacity: 0.45;
+}
+
+.closet-bg-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #593a50;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.closet-bg-spinner {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  border: 2px solid #ead4df;
+  border-top-color: #c58ca8;
+  border-radius: 50%;
+  animation: closet-bg-spin 0.8s linear infinite;
+}
+
+@keyframes closet-bg-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .closet-bg-spinner {
+    animation: none;
+  }
+}
+
+.closet-bg-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.closet-bg-panel .closet-upload-error {
+  margin: 0;
+}
+
+.closet-bg-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.closet-bg-btn {
+  padding: 9px 15px;
+  background: #fff1f7;
+  border: 1px solid #e2c5d4;
+  border-radius: 20px;
+  color: #65455a;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.closet-bg-btn:hover {
+  background: #f3d6e4;
+}
+
+.closet-bg-btn:focus-visible {
+  outline: 2px solid #c58ca8;
+  outline-offset: 2px;
+}

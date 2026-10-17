@@ -3,9 +3,10 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-const { GoogleGenAI, Type } = require('@google/genai');
+const { GoogleGenAI } = require('@google/genai');
 
 const pickOutfit = require('./outfitPicker');
+const { buildPrompt, cleanCloset, responseSchema, validateRecommendation } = require('./darling');
 const sampleCloset = require('./sampleCloset');
 
 const app = express();
@@ -30,24 +31,59 @@ app.get('/api/options', (req, res) => {
 
 // Real route: the frontend sends the user's closet and choices.
 app.post('/api/outfit', (req, res) => {
-  const { closet, aesthetic, weather } = req.body;
+  // mode is optional: 'separates' (top + bottom) or 'dress'.
+  const { closet, aesthetic, weather, mode } = req.body;
 
   // Make sure we actually got clothes.
   if (!Array.isArray(closet) || closet.length === 0) {
     return res.status(400).json({ error: 'Please send a closet with at least one item.' });
   }
 
-  const outfit = pickOutfit(closet, aesthetic, weather);
+  const outfit = pickOutfit(closet, aesthetic, weather, mode);
   res.json(outfit);
 });
+// Turn a remove.bg error into a message the closet popup can show.
+// retryable tells the frontend whether "Try Again" makes sense.
+function removeBgError(status, details) {
+  let code = '';
+  try {
+    code = JSON.parse(details).errors?.[0]?.code || '';
+  } catch {
+    // remove.bg sent something that isn't JSON; fall through to the generic message.
+  }
+
+  if (code === 'unknown_foreground') {
+    return { status: 422, error: "Couldn't find the clothing in this photo. Try a photo with the piece clearly in view.", retryable: false };
+  }
+  if (status === 402) {
+    return { status: 402, error: 'The background remover is out of credits for now.', retryable: false };
+  }
+  if (status === 403) {
+    return { status: 503, error: 'The background remover API key was rejected. Check REMOVE_BG_API_KEY in server/.env.', retryable: false };
+  }
+  if (status === 429) {
+    return { status: 429, error: 'The background remover is busy. Please wait a moment and try again.', retryable: true };
+  }
+  return { status: 502, error: 'Background removal failed.', retryable: true };
+}
+
 // Remove the background from a clothing photo using remove.bg.
 app.post('/api/remove-background', async (req, res) => {
   try {
     // The frontend sends the photo as a data URL: "data:image/jpeg;base64,....."
     const { image } = req.body;
 
-    if (!image || !image.startsWith('data:image/')) {
-      return res.status(400).json({ error: 'Please send an image as a data URL.' });
+    if (typeof image !== 'string' || !image.startsWith('data:image/')) {
+      return res.status(400).json({ error: 'Please send an image as a data URL.', retryable: false });
+    }
+
+    // Like Gemini, remove.bg is optional: say so clearly instead of calling it with no key.
+    if (!process.env.REMOVE_BG_API_KEY) {
+      return res.status(503).json({
+        error: "Background removal isn't set up yet: add REMOVE_BG_API_KEY to server/.env.",
+        code: 'not_configured',
+        retryable: false,
+      });
     }
 
     // Keep only the base64 part (everything after the comma).
@@ -69,7 +105,8 @@ app.post('/api/remove-background', async (req, res) => {
     if (!response.ok) {
       const details = await response.text();
       console.error('remove.bg error:', response.status, details);
-      return res.status(502).json({ error: 'Background removal failed.' });
+      const { status, error, retryable } = removeBgError(response.status, details);
+      return res.status(status).json({ error, retryable });
     }
 
     // Turn the PNG it sends back into a data URL for the frontend.
@@ -77,7 +114,7 @@ app.post('/api/remove-background', async (req, res) => {
     res.json({ image: `data:image/png;base64,${pngBuffer.toString('base64')}` });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Something went wrong removing the background.' });
+    res.status(500).json({ error: 'Something went wrong removing the background.', retryable: true });
   }
 });
 // Get the weather for a place and date, as "hot", "mild", or "cold".
@@ -104,70 +141,6 @@ app.get('/api/weather', async (req, res) => {
       url.searchParams.set('forecast_days', '1');
     }
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-app.post('/api/recommend-outfit', async (req, res) => {
-  try {
-    const { closet, occasion, aesthetic, weather } = req.body;
-
-    if (!closet || !Array.isArray(closet) || closet.length === 0) {
-      return res.status(400).json({ error: 'Closet items are required.' });
-    }
-
-    const prompt = `
-      You are the AI stylist for "The Fitting Room".
-      User Request:
-      - Occasion: ${occasion || 'Casual'}
-      - Aesthetic: ${aesthetic || '90s Rom-Com'}
-      - Weather: ${weather || 'Warm and sunny'}
-
-      Available Closet Items:
-      ${JSON.stringify(closet, null, 2)}
-
-      Instructions:
-      1. Select EXACT item IDs from the user's available closet to build a complete outfit (Top, Bottom/Dress, Shoes, Accessories).
-      2. ONLY pick item IDs that exist in the provided closet list.
-      3. Provide a witty, stylish explanation for why this outfit was picked.
-    `;
-
-    const responseSchema = {
-      type: Type.OBJECT,
-      properties: {
-        selectedItemIds: {
-          type: Type.ARRAY,
-          items: { type: Type.STRING },
-          description: 'List of string IDs corresponding to selected closet items.'
-        },
-        stylistComment: {
-          type: Type.STRING,
-          description: 'A fun explanation of the outfit choice.'
-        }
-      },
-      required: ['selectedItemIds', 'stylistComment']
-    };
-
-    const responses = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema,
-        temperature: 0.7,
-      }
-    });
-
-    const recommendation = JSON.parse(response.text || '{}');
-
-    if (!recommendation.selectedItemIds || !recommendation.stylistComment) {
-      return res.status(500).json({ error: 'The AI returned an incomplete outfit recommendation.' });
-    }
-
-    return res.json(recommendation);
-  } catch (error) {
-    console.error('Gemini API Error:', error);
-    return res.status(500).json({ error: 'Failed to generate outfit recommendation.' });
-  }
-});
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -192,7 +165,67 @@ app.post('/api/recommend-outfit', async (req, res) => {
     res.status(500).json({ error: 'Something went wrong getting the weather.' });
   }
 });
-// TODO: Add Gemini AI outfit recommendations here.
+// Gemini is optional: without a key, every other endpoint keeps working.
+// GEMINI_MODEL lets the team switch models from server/.env without a code change.
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+let gemini = null;
+function getGemini() {
+  if (!process.env.GEMINI_API_KEY) return null;
+  if (!gemini) gemini = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  return gemini;
+}
+
+// Ask Darling: turn the user's own words into an outfit from their saved closet.
+// The rule-based /api/outfit above stays as the quick "Style Me!" option.
+app.post('/api/recommend-outfit', async (req, res) => {
+  try {
+    const { closet, request, occasion, aesthetic, weather, forecast, today, avoid } = req.body || {};
+
+    if (!closet || !Array.isArray(closet) || closet.length === 0) {
+      return res.status(400).json({ error: 'Closet items are required.' });
+    }
+
+    const items = cleanCloset(closet);
+    if (items.length === 0) {
+      return res.status(400).json({ error: 'Closet items need an id and a category.' });
+    }
+
+    const hasRequest = [request, occasion, aesthetic].some((value) => typeof value === 'string' && value.trim());
+    if (!hasRequest) {
+      return res.status(400).json({ error: 'Tell Darling what you need help with.' });
+    }
+
+    const ai = getGemini();
+    if (!ai) {
+      return res.status(503).json({ error: "Ask Darling isn't set up yet: add GEMINI_API_KEY to server/.env." });
+    }
+
+    const prompt = buildPrompt({ closet: items, request, occasion, aesthetic, weather, forecast, today, avoid });
+
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema,
+        // A little more variety when the user asks to "Try Another".
+        temperature: Array.isArray(avoid) && avoid.length > 0 ? 1 : 0.7,
+      }
+    });
+
+    let recommendation;
+    try {
+      recommendation = JSON.parse(response.text || '{}');
+    } catch {
+      return res.status(502).json({ error: 'Darling sent back an answer we could not read. Please try again.' });
+    }
+
+    return res.json(validateRecommendation(recommendation, items));
+  } catch (error) {
+    console.error('Gemini API Error:', error);
+    return res.status(500).json({ error: 'Darling could not put an outfit together right now. Please try again.' });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

@@ -31,11 +31,23 @@ function pickItem(closet, category, aesthetic, weather) {
   return randomFrom(styleMatches.length > 0 ? styleMatches : pool);
 }
 
-// Build a whole outfit: one top, one bottom, one pair of shoes.
-function pickOutfit(closet, aesthetic, weather) {
+// Decide between top + bottom and a dress.
+// Without a mode, keep the original top/bottom/shoes behaviour unless the closet only has dresses.
+function chooseType(closet, mode) {
+  if (mode === 'separates' || mode === 'dress') return mode;
+  const has = (category) => closet.some((item) => item.category === category);
+  return !has('top') && !has('bottom') && has('dress') ? 'dress' : 'separates';
+}
+
+// Build a whole outfit: a top + bottom or a dress, plus one pair of shoes.
+// Slots that don't belong to the chosen type are null.
+function pickOutfit(closet, aesthetic, weather, mode) {
+  const type = chooseType(closet, mode);
   return {
-    top: pickItem(closet, 'top', aesthetic, weather),
-    bottom: pickItem(closet, 'bottom', aesthetic, weather),
+    type,
+    top: type === 'separates' ? pickItem(closet, 'top', aesthetic, weather) : null,
+    bottom: type === 'separates' ? pickItem(closet, 'bottom', aesthetic, weather) : null,
+    dress: type === 'dress' ? pickItem(closet, 'dress', aesthetic, weather) : null,
     shoes: pickItem(closet, 'shoes', aesthetic, weather),
   };
 }

@@ -12,7 +12,22 @@ const sampleCloset = require('./sampleCloset');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// Only our own frontends may call the API from a browser.
+// CORS_ORIGINS (comma-separated) adds more, e.g. a phone testing over the LAN: http://192.168.1.20:5173
+const allowedOrigins = new Set([
+  'https://outfit-darling-web-production.up.railway.app',
+  'https://outfit-darling.us',
+  ...(process.env.CORS_ORIGINS || '').split(',').map((origin) => origin.trim().replace(/\/+$/, '')).filter(Boolean),
+]);
+// Local development on any port (Vite dev is 5173, vite preview is 4173).
+const localOrigin = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
+app.use(cors({
+  // Requests with no Origin (curl, health checks) aren't from a browser, so CORS doesn't apply.
+  origin: (origin, callback) => callback(null, !origin || allowedOrigins.has(origin) || localOrigin.test(origin)),
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+}));
 app.use(express.json({ limit: '15mb' }));
 
 app.get('/api/health', (req, res) => {

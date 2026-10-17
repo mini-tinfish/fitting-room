@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-   import { getCloset } from '../closetStore';
+import { getCloset, saveLook } from '../closetStore';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 const SLOTS = ['top', 'bottom', 'shoes'];
@@ -26,6 +26,7 @@ export default function StyleMe() {
   }, []);
 
   function itemsIn(category) {
+    
     return closet.filter((item) => item.category === category);
   }
 
@@ -63,7 +64,16 @@ export default function StyleMe() {
       setStatus('Could not get an outfit.');
     }
   }
-
+  // Save whatever the carousel is showing right now.
+  async function handleSaveLook() {
+    const itemIds = {};
+    for (const category of SLOTS) {
+      const item = itemsIn(category)[picks[category]];
+      itemIds[category] = item ? item.id : null;
+    }
+    await saveLook({ itemIds, aesthetic, weather });
+    setStatus('💖 Saved to your Lookbook!');
+  }
   return (
     <div>
       <h2>Style Me</h2>
@@ -85,11 +95,13 @@ export default function StyleMe() {
       </label>{' '}
 
       <button onClick={styleMe}>✨ Style me</button>
+        {' '}<button onClick={handleSaveLook}>❤️ Save this look</button>
       <p>{status}</p>
 
       {SLOTS.map((category) => {
         const items = itemsIn(category);
         const item = items[picks[category]];
+       
         return (
           <div key={category} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, margin: '8px 0' }}>
             <button onClick={() => step(category, -1)} disabled={items.length < 2}>◀</button>

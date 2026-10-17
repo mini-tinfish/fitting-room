@@ -1,5 +1,4 @@
-import { get, update } from 'idb-keyval';
-
+import { get, set, update } from 'idb-keyval';
 const KEY = 'closet';
 
 // Make an id that won't collide, even for two items saved in the same millisecond.
@@ -25,4 +24,23 @@ export async function addItem(item) {
 // Remove one item by its id.
 export async function removeItem(id) {
   await update(KEY, (closet = []) => closet.filter((item) => item.id !== id));
+}
+
+// ---------- Saved looks (Lookbook) ----------
+const LOOKS_KEY = 'looks';
+
+export async function getLooks() {
+  return (await get(LOOKS_KEY)) || [];
+}
+
+export async function saveLook(look) {
+  const looks = await getLooks();
+  const newLook = { ...look, id: `look-${Date.now()}`, savedAt: new Date().toISOString() };
+  await set(LOOKS_KEY, [...looks, newLook]);
+  return newLook;
+}
+
+export async function removeLook(id) {
+  const looks = await getLooks();
+  await set(LOOKS_KEY, looks.filter((look) => look.id !== id));
 }

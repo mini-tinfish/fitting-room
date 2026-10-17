@@ -7,6 +7,7 @@ import { addDays, daysBetween, formatDate, relativeDayLabel, toDateKey } from '.
 import './StyleMe.css';
 import arrowLeftImage from '../assets/buttons/button_point_left.png';
 import arrowRightImage from '../assets/buttons/button_point_right.png';
+import styleMeButtonImage from '../assets/buttons/style_me_button.png';
 
 const EMPTY_LABELS = { top: 'No tops yet', bottom: 'No bottoms yet', dress: 'No dresses yet', shoes: 'No shoes yet' };
 const EXAMPLE_REQUESTS = [
@@ -477,9 +478,20 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
             })}
           </div>
 
-          <button type="button" className="dr-style-btn" onClick={styleMe} disabled={styling}>
-            {styling ? 'Styling…' : '✧ Style Me! ✧'}
+          <button
+            type="button"
+            className="dr-style-btn"
+            onClick={styleMe}
+            disabled={styling}
+            aria-busy={styling}
+            aria-label={styling ? 'Generating outfit…' : 'Generate outfit'}
+          >
+            <img src={styleMeButtonImage} alt="" />
           </button>
+          {/* The artwork has no loading text, so announce it for screen readers. */}
+          <span className="visually-hidden" role="status">
+            {styling ? 'Styling your outfit…' : ''}
+          </span>
           <label className="visually-hidden" htmlFor="look-name">Name this look</label>
           <input
             id="look-name"

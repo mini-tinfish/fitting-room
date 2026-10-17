@@ -248,27 +248,42 @@
   cursor: default;
 }
 
+/* Custom Procreate "Style Me!" button: only the artwork shows.
+   The <button> itself is reset (otherwise the browser draws its own gray box) and
+   shrinks to fit the image. 192px is 1.5x the 128px source. */
 .dr-style-btn {
-  min-width: 200px;
-  padding: 13px 26px;
-  background: #e9bfd4;
-  border: 2px solid #c58ca8;
-  border-radius: 999px;
-  box-shadow: 4px 4px 0 #bd98ab;
-  color: var(--plum);
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 1px;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0;
+  appearance: none;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  box-shadow: none;
   cursor: pointer;
 }
 
-.dr-style-btn:active:not(:disabled) {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 #bd98ab;
+.dr-style-btn img {
+  display: block;
+  width: 192px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 
+.dr-style-btn:active:not(:disabled) img {
+  transform: translate(2px, 2px);
+}
+
+.dr-style-btn:focus-visible {
+  outline: 2px solid #c58ca8;
+  outline-offset: 2px;
+}
+
+/* While styling: same artwork, just not clickable. */
 .dr-style-btn:disabled {
-  opacity: 0.6;
   cursor: progress;
 }
 

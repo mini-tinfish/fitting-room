@@ -4,6 +4,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
+const pickOutfit = require('./outfitPicker');
+const sampleCloset = require('./sampleCloset');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -25,6 +28,14 @@ app.get('/api/options', (req, res) => {
     aesthetics: ['90s rom-com', 'Clean girl', 'Y2K', 'Dark academia', 'Streetwear'],
   });
 });
+
+// Test route: build an outfit from the sample closet.
+app.get('/api/outfit/test', (req, res) => {
+  const { aesthetic, weather } = req.query;
+  const outfit = pickOutfit(sampleCloset, aesthetic, weather);
+  res.json(outfit);
+});
+
 // TODO: Add Gemini AI outfit recommendations here.
 
 app.listen(PORT, () => {

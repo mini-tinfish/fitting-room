@@ -4,6 +4,7 @@ import './MyCloset.css'
 import { addItem, removeItem } from '../closetStore'
 import { removeBackground } from '../api/removeBackground'
 import removeButtonImage from '../assets/buttons/remove-button.png'
+import uploadButtonImage from '../assets/buttons/upload_button.png'
 
 const categories = [
   { value: 'all', label: 'All' },
@@ -11,7 +12,13 @@ const categories = [
   { value: 'bottom', label: 'Bottoms' },
   { value: 'dress', label: 'Dresses' },
   { value: 'shoes', label: 'Shoes' },
-  { value: 'accessory', label: 'Accessories' },
+]
+
+// The saved values stay light / medium / warm so the outfit picker's weather matching keeps working.
+const fabricWeights = [
+  { value: 'light', label: 'Lightweight — airy and breathable' },
+  { value: 'medium', label: 'Medium — everyday clothing' },
+  { value: 'warm', label: 'Heavyweight — thick and insulating' },
 ]
 
 const emptyItem = {
@@ -19,7 +26,6 @@ const emptyItem = {
   category: 'top',
   color: '',
   warmth: 'medium',
-  tags: '',
   image: '',
   backgroundRemoved: false,
 }
@@ -157,11 +163,10 @@ async function handleSaveClothing(event) {
     name: newItem.name.trim(),
     category: newItem.category,
     color: newItem.color.trim().toLowerCase(),
-    warmth: newItem.warmth,
-    tags: newItem.tags
-      .split(',')
-      .map((tag) => tag.trim().toLowerCase())
-      .filter(Boolean),
+    // Fabric weight doesn't apply to shoes.
+    warmth: newItem.category === 'shoes' ? null : newItem.warmth,
+    // Tags are no longer entered; older items keep theirs.
+    tags: [],
     image: newItem.image,
     // false = the user chose to keep the original photo. Older items don't have this field.
     backgroundRemoved: newItem.backgroundRemoved,
@@ -351,7 +356,12 @@ async function handleRemove(id) {
               alt="Original clothing photo"
             />
           ) : (
-            <span>📷 Choose a clothing photo</span>
+            // Procreate artwork with the words on it, so its alt text names the file picker.
+            <img
+              className="closet-upload-art"
+              src={uploadButtonImage}
+              alt="Upload clothing photo"
+            />
           )}
 
           {photo.original && (
@@ -454,14 +464,16 @@ async function handleRemove(id) {
               <option value="bottom">Bottoms</option>
               <option value="dress">Dresses</option>
               <option value="shoes">Shoes</option>
-              <option value="accessory">Accessories</option>
             </select>
           </label>
 
           <label>
-            Warmth
+            Fabric Weight
+            {/* Shoes have no fabric weight. The choice is kept, so switching back restores it. */}
             <select
-              value={newItem.warmth}
+              value={newItem.category === 'shoes' ? '' : newItem.warmth}
+              disabled={newItem.category === 'shoes'}
+              aria-describedby={newItem.category === 'shoes' ? 'closet-weight-hint' : undefined}
               onChange={(e) =>
                 setNewItem({
                   ...newItem,
@@ -469,10 +481,18 @@ async function handleRemove(id) {
                 })
               }
             >
-              <option value="light">Light</option>
-              <option value="medium">Medium</option>
-              <option value="warm">Warm</option>
+              {newItem.category === 'shoes' && <option value="">—</option>}
+              {fabricWeights.map((weight) => (
+                <option key={weight.value} value={weight.value}>
+                  {weight.label}
+                </option>
+              ))}
             </select>
+            {newItem.category === 'shoes' && (
+              <span id="closet-weight-hint" className="closet-field-hint">
+                Not applicable to shoes.
+              </span>
+            )}
           </label>
         </div>
 
@@ -488,24 +508,6 @@ async function handleRemove(id) {
               })
             }
           />
-        </label>
-
-        <label>
-          Aesthetic tags
-          <input
-            placeholder="coquette, casual, y2k"
-            aria-describedby="closet-tags-hint"
-            value={newItem.tags}
-            onChange={(e) =>
-              setNewItem({
-                ...newItem,
-                tags: e.target.value,
-              })
-            }
-          />
-          <span id="closet-tags-hint" className="closet-field-hint">
-            Style Me matches these: 90s rom-com, clean girl, y2k, dark academia, streetwear.
-          </span>
         </label>
 
         {uploadError && (

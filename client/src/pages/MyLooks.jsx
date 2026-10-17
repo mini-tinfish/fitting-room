@@ -11,6 +11,8 @@ const TILTS = ['-3deg', '2deg', '-1.5deg', '2.5deg', '-2deg'];
 const TAPE_TILTS = ['-4deg', '5deg', '-2deg', '3deg'];
 const TAPES = ['jb-washi-pink', 'jb-washi-green', 'jb-washi-dots', 'jb-washi-gingham'];
 const WEATHER_EMOJI = { hot: '☀️', mild: '⛅', cold: '❄️' };
+// Saved as light / medium / warm; shown with the names My Closet uses.
+const FABRIC_WEIGHT_LABELS = { light: 'Lightweight', medium: 'Medium', warm: 'Heavyweight' };
 
 function formatDate(raw) {
   if (!raw) return null;
@@ -82,8 +84,9 @@ export default function MyLooks({ closet, looks, onRemoveLook, onAddPlan, onRest
                 {item ? (
                   <>
                     <div>Color: {item.color || '—'}</div>
-                    <div>Warmth: {item.warmth || '—'}</div>
-                    <div>Style: {(item.tags || []).join(', ') || '—'}</div>
+                    {/* New shoes have no fabric weight; only older items have tags. */}
+                    {item.warmth && <div>Fabric Weight: {FABRIC_WEIGHT_LABELS[item.warmth] || item.warmth}</div>}
+                    {item.tags?.length > 0 && <div>Style: {item.tags.join(', ')}</div>}
                   </>
                 ) : piece.id ? (
                   <div>This piece isn&apos;t in your closet anymore.</div>
@@ -104,7 +107,6 @@ export default function MyLooks({ closet, looks, onRemoveLook, onAddPlan, onRest
             {removing ? 'Removing…' : 'Remove this look'}
           </button>
         </div>
-        <p className="lookbook-muted">Restyling starts a new outfit; this saved look stays as it is.</p>
 
         {planning && (
           <PlanOutfitModal

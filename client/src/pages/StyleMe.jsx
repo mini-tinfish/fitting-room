@@ -63,6 +63,7 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
 
   const mode = draft.mode;
   const slots = OUTFIT_MODES[mode];
+  // Accessories can no longer be picked here, but ones already in a plan being edited are kept.
   const accessoryItems = itemsIn('accessory');
   const chosenAccessories = draft.accessories.filter((id) => accessoryItems.some((item) => item.id === id));
 
@@ -86,15 +87,6 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
 
   function setMode(nextMode) {
     setDraft((previous) => ({ ...previous, mode: nextMode }));
-  }
-
-  function toggleAccessory(id) {
-    setDraft((previous) => ({
-      ...previous,
-      accessories: previous.accessories.includes(id)
-        ? previous.accessories.filter((accessoryId) => accessoryId !== id)
-        : [...previous.accessories, id],
-    }));
   }
 
   // Ask the backend for an outfit, then point each row at what it picked.
@@ -208,7 +200,8 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
       // Try Another: tell Darling which combinations it already suggested.
       const avoid = tryAnother && darling ? [...darling.avoid, darling.result.selectedItemIds].slice(-5) : [];
       const result = await askDarling({
-        closet,
+        // Accessories aren't offered anymore, so Darling only sees clothes and shoes.
+        closet: closet.filter((item) => item.category !== 'accessory'),
         request: text,
         weather: forecast?.weather,
         forecast: forecast || undefined,
@@ -483,27 +476,6 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
               );
             })}
           </div>
-
-          {accessoryItems.length > 0 && (
-            <div className="dr-accessories">
-              <span className="visually-hidden">Accessories · optional</span>
-              <div className="dr-accessory-row">
-                {accessoryItems.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className="dr-accessory"
-                    aria-pressed={chosenAccessories.includes(item.id)}
-                    aria-label={`${chosenAccessories.includes(item.id) ? 'Remove' : 'Add'} ${item.name || 'accessory'}`}
-                    title={item.name}
-                    onClick={() => toggleAccessory(item.id)}
-                  >
-                    <img src={item.image} alt="" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
 
           <button type="button" className="dr-style-btn" onClick={styleMe} disabled={styling}>
             {styling ? 'Styling…' : '✧ Style Me! ✧'}

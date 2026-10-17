@@ -17,9 +17,10 @@ function pickItem(closet, category, aesthetic, weather) {
   if (items.length === 0) return null;
 
   // 2. Prefer items that fit the weather.
+  // Items with no warmth (new shoes have no fabric weight) fit any weather.
   const okWarmth = warmthForWeather[weather];
   const weatherMatches = okWarmth
-    ? items.filter((item) => okWarmth.includes(item.warmth))
+    ? items.filter((item) => !item.warmth || okWarmth.includes(item.warmth))
     : [];
   const pool = weatherMatches.length > 0 ? weatherMatches : items;
 

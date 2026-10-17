@@ -279,25 +279,56 @@
   cursor: not-allowed;
 }
 
+/* Custom Procreate remove button: only the artwork shows.
+   The PNG is wide (128x63), so it's sized by width and the height follows.
+   max-width shrinks it to fit narrow mobile cards. */
 .clothing-remove-btn {
-  width: 100%;
-  margin-top: 10px;
-  padding: 6px 8px;
-  background: #f9e9f1;
-  border: 1px solid #ead4df;
-  border-radius: 8px;
-  color: #815974;
-  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 44px;
+  margin: 8px auto 0;
+  padding: 2px;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
   cursor: pointer;
 }
 
-.clothing-remove-btn:hover:not(:disabled) {
-  background: #f3d6e4;
+.clothing-remove-btn img {
+  display: block;
+  width: 115px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.clothing-remove-btn:hover:not(:disabled) img {
+  transform: scale(1.08);
+  filter: drop-shadow(1px 2px 0 rgba(73, 51, 73, 0.18));
+}
+
+.clothing-remove-btn:focus-visible {
+  outline: 2px solid #c58ca8;
+  outline-offset: 2px;
 }
 
 .clothing-remove-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clothing-remove-btn img {
+    transition: none;
+  }
+
+  .clothing-remove-btn:hover:not(:disabled) img {
+    transform: none;
+  }
 }
 
 @media (max-width: 480px) {

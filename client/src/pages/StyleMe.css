@@ -78,19 +78,6 @@
   scroll-margin-top: 16px;
 }
 
-.dr-vibe {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  text-align: center;
-}
-
-.dr-vibe .od-chip-row {
-  justify-content: center;
-}
-
 .dr-mode-toggle {
   display: inline-flex;
   padding: 3px;
@@ -130,11 +117,14 @@
   border-radius: 18px;
 }
 
+/* Narrower than the doll so the arrows sit closer to the clothing (about 25px in on each side). */
 .dr-slot {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  grid-template-columns: 64px minmax(0, 1fr) 64px;
   align-items: center;
   gap: 6px;
+  width: min(100%, 310px);
+  align-self: center;
 }
 
 .dr-piece {
@@ -207,6 +197,7 @@
 }
 
 .dr-piece-name {
+  margin-top: 10px;
   max-width: 100%;
   overflow: hidden;
   color: var(--text-muted);
@@ -215,31 +206,46 @@
   white-space: nowrap;
 }
 
+/* Custom Procreate left/right buttons, shown exactly as drawn (no mirroring, opacity or filters).
+   The browser's default button chrome is removed; the artwork fills its 128px canvas. */
 .dr-arrow {
-  width: 38px;
-  height: 38px;
+  width: 64px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  background: #fce4ee;
-  border: 1px solid #dcb9cb;
+  background: none;
+  border: 0;
   border-radius: 50%;
-  box-shadow: 2px 2px 0 #e3cbd6;
-  color: var(--plum);
-  font-size: 0.8rem;
+  box-shadow: none;
   cursor: pointer;
 }
 
-.dr-arrow:active:not(:disabled) {
-  transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0 #e3cbd6;
+.dr-arrow img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.15s ease;
 }
 
+.dr-arrow:hover:not(:disabled) img {
+  transform: scale(1.06);
+}
+
+.dr-arrow:active:not(:disabled) img {
+  transform: translate(1px, 1px);
+}
+
+.dr-arrow:focus-visible {
+  outline: 2px solid #c58ca8;
+  outline-offset: 2px;
+}
+
+/* Disabled (fewer than two pieces): the artwork stays fully visible; it just stops responding. */
 .dr-arrow:disabled {
-  opacity: 0.35;
   cursor: default;
-  box-shadow: none;
 }
 
 /* Optional accessories: tap to add or remove. */
@@ -315,11 +321,33 @@
 
 /* ---------- Ask Darling panel ---------- */
 
-.dr-ask {
+/* Right column: Ask Darling, then Darling's advice directly underneath.
+   It stays pinned while scrolling only until there's advice, so a long answer is never cut off. */
+.dr-side {
   grid-area: ask;
   align-self: start;
   position: sticky;
   top: 16px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dr-side.has-advice {
+  position: static;
+}
+
+/* Empty until Darling answers, so it adds no gap. */
+.dr-advice-slot:empty {
+  display: none;
+}
+
+.dr-advice-slot {
+  scroll-margin-top: 16px;
+}
+
+.dr-ask {
   padding: 16px;
   background: #fdf0f6;
   border: 1px solid #ead4df;
@@ -403,17 +431,39 @@
   cursor: progress;
 }
 
-/* Darling's answer, shown under the outfit it picked. */
+/* "♡ Darling's Advice": a retro window under the Ask Darling form. */
+.dr-advice {
+  overflow: hidden;
+  background: #fff;
+  border: 2px solid #dcb9cb;
+  border-radius: 14px;
+  box-shadow: 4px 4px 0 #e3cbd6;
+}
+
+.dr-advice-bar {
+  margin: 0;
+  padding: 10px 14px;
+  background: #efc9dc;
+  color: var(--plum);
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.dr-advice.is-warning {
+  border-color: #e0a8a8;
+  background: #fff8f6;
+}
+
+.dr-advice.is-warning .dr-advice-bar {
+  background: #f6d2d2;
+}
+
 .dr-darling-card {
-  width: min(100%, 420px);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
   padding: 14px 16px;
-  background: #fff;
-  border: 2px dashed #e8bfd2;
-  border-radius: 14px;
   text-align: left;
   font-size: 0.85rem;
 }
@@ -422,9 +472,8 @@
   margin: 0;
 }
 
-.dr-darling-card.is-warning {
-  border-color: #e0a8a8;
-  background: #fff8f6;
+.dr-advice-loading {
+  color: var(--text-muted);
 }
 
 .dr-darling-title {
@@ -554,6 +603,14 @@
   .dr-toast {
     animation: none;
   }
+
+  .dr-arrow img {
+    transition: none;
+  }
+
+  .dr-arrow:hover:not(:disabled) img {
+    transform: none;
+  }
 }
 
 /* ---------- Phones: Ask Darling first, then a compact doll ---------- */
@@ -568,7 +625,7 @@
     padding: 14px;
   }
 
-  .dr-ask {
+  .dr-side {
     position: static;
   }
 
@@ -584,13 +641,15 @@
     height: 78px;
   }
 
+  /* Arrows shrink a little on phones so the clothing column keeps enough width. */
   .dr-slot {
-    grid-template-columns: 36px minmax(0, 1fr) 36px;
+    grid-template-columns: 50px minmax(0, 1fr) 50px;
+    gap: 4px;
   }
 
   .dr-arrow {
-    width: 34px;
-    height: 34px;
+    width: 50px;
+    height: 50px;
   }
 
   .dr-toast-region {

@@ -5,14 +5,9 @@ import PlanOutfitModal from '../components/PlanOutfitModal';
 import { OUTFIT_MODES, SLOT_LABELS, isOutfitEmpty, normalizeOutfit, outfitPieces, outfitSignature } from '../outfit';
 import { addDays, daysBetween, formatDate, relativeDayLabel, toDateKey } from '../dates';
 import './StyleMe.css';
+import arrowLeftImage from '../assets/buttons/button_point_left.png';
+import arrowRightImage from '../assets/buttons/button_point_right.png';
 
-// Used until /api/options answers, and when the backend is offline.
-const FALLBACK_AESTHETICS = ['90s rom-com', 'Clean girl', 'Y2K', 'Dark academia', 'Streetwear'];
-const WEATHER_OPTIONS = [
-  { value: 'hot', label: 'Hot', icon: '☀️' },
-  { value: 'mild', label: 'Mild', icon: '🌤️' },
-  { value: 'cold', label: 'Cold', icon: '❄️' },
-];
 const EMPTY_LABELS = { top: 'No tops yet', bottom: 'No bottoms yet', dress: 'No dresses yet', shoes: 'No shoes yet' };
 const EXAMPLE_REQUESTS = [
   { label: 'First date', text: "First date tomorrow at a nice restaurant. It'll be chilly. Feminine but a little edgy, without trying too hard." },
@@ -26,12 +21,6 @@ const TOAST_MS = 4000;
 // closet comes from App.jsx, so it always matches what My Closet shows.
 // draft (also kept in App.jsx) is the outfit on the dressing room, so it survives switching tabs.
 export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, onAddPlan, onUpdatePlan, onGoTo }) {
-  const [aesthetics, setAesthetics] = useState(FALLBACK_AESTHETICS);
-  const [aesthetic, setAesthetic] = useState(FALLBACK_AESTHETICS[0]);
-  const [weather, setWeather] = useState('mild');
-  // Only send the weather pick to Darling once the user has actually chosen one.
-  const [weatherChosen, setWeatherChosen] = useState(false);
-
   const [styling, setStyling] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
@@ -48,24 +37,7 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
   const [checkingForecast, setCheckingForecast] = useState(false);
 
   const toastTimer = useRef(null);
-  const dollRef = useRef(null);
-
-  // Load the aesthetic menu when the page opens.
-  useEffect(() => {
-    let cancelled = false;
-    fetch(`${API_URL}/api/options`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (cancelled || !Array.isArray(data.aesthetics) || data.aesthetics.length === 0) return;
-        setAesthetics(data.aesthetics);
-        setAesthetic((current) => (data.aesthetics.includes(current) ? current : data.aesthetics[0]));
-      })
-      // Offline: the built-in list above keeps quick styling usable.
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const adviceRef = useRef(null);
 
   // Clear a pending toast timer if the page closes. (We want the latest timer here, not a snapshot.)
   useEffect(() => {
@@ -140,10 +112,12 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
       // JSON.stringify drops undefined fields, so the image is left out of the request.
       const lightCloset = closet.map((item) => ({ ...item, image: undefined }));
 
+      // No aesthetic: the picker chooses from the whole closet. Weather only when the user
+      // checked a forecast; without it the picker ignores warmth.
       const response = await fetch(`${API_URL}/api/outfit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ closet: lightCloset, aesthetic, weather, mode }),
+        body: JSON.stringify({ closet: lightCloset, weather: forecast?.weather, mode }),
       });
       const outfit = await response.json();
       if (!response.ok) throw new Error(outfit.error);
@@ -168,14 +142,23 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
     if (saving || outfitEmpty || alreadySaved) return;
     setSaving(true);
     try {
-      const look = { itemIds: normalizeOutfit(currentOutfit), aesthetic, weather };
-            const name = lookName.trim();
+      // Lookbook and My Week show "aesthetic · weather" as each look's caption.
+      // Use what Darling understood when Darling styled it, otherwise simple defaults.
+      const fromDarling = darling && darling.signature === signature;
+      const understood = fromDarling ? darling.result.understood : {};
+      const look = {
+        itemIds: normalizeOutfit(currentOutfit),
+        aesthetic: understood.aesthetic || understood.occasion || (fromDarling ? "Darling's pick" : 'My look'),
+        weather: understood.weather || forecast?.weather || 'any weather',
+      };
+      // Optional name from the "Name this look" field; Lookbook shows it instead of the aesthetic.
+      const name = lookName.trim();
       if (name) look.name = name;
-      if (darling && darling.signature === signature) {
+      if (fromDarling) {
         look.darling = { request: darling.request, explanation: darling.result.explanation };
       }
       await onSaveLook(look);
-            setLookName('');
+      setLookName('');
       showToast('💖 Saved to your Lookbook!', 'success', { label: 'See Lookbook', onClick: () => onGoTo('saved') });
     } catch {
       showToast('Could not save this look. Please try again.', 'error');
@@ -227,7 +210,7 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
       const result = await askDarling({
         closet,
         request: text,
-        weather: weatherChosen ? weather : undefined,
+        weather: forecast?.weather,
         forecast: forecast || undefined,
         today: toDateKey(),
         avoid,
@@ -248,9 +231,9 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
       }
       setDarling({ request: text, result, signature: outfitSignature(applied), avoid });
 
-      // On phones the dressing room sits below this panel, so bring the new outfit into view.
+      // On phones Darling's advice sits right under the form, with the outfit below it: bring the advice into view.
       if (window.matchMedia('(max-width: 760px)').matches) {
-        dollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        adviceRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     } catch (err) {
       setAskError(err.message || "Darling couldn't answer right now. Please try again.");
@@ -291,8 +274,6 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
       if (!response.ok) throw new Error(data.error);
 
       setForecast(data);
-      setWeather(data.weather);
-      setWeatherChosen(true);
     } catch (err) {
       if (err?.code === 1) {
         setAskError("Location is turned off, so Darling can't check the forecast. Just describe the weather instead ♡");
@@ -345,120 +326,104 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
       )}
 
       <div className="dr-body">
-        {/* ---------- Ask Darling ---------- */}
-        <section className="dr-ask" aria-labelledby="ask-darling-title">
-          <h3 id="ask-darling-title" className="dr-section-title">
-            Ask Darling ♡
-          </h3>
-          <p className="dr-hint">Tell Darling where you&apos;re going, the weather and the vibe.</p>
+        {/* ---------- Right column: Ask Darling, then Darling's advice ---------- */}
+        <div className={`dr-side ${darling || asking ? 'has-advice' : ''}`}>
+          <section className="dr-ask" aria-labelledby="ask-darling-title">
+            <h3 id="ask-darling-title" className="dr-section-title">
+              Ask Darling ♡
+            </h3>
+            <p className="dr-hint">Tell Darling where you&apos;re going, the weather and the vibe.</p>
 
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              handleAsk(false);
-            }}
-          >
-            <label className="visually-hidden" htmlFor="darling-request">
-              Describe your plans
-            </label>
-            <textarea
-              id="darling-request"
-              className="dr-textarea"
-              rows={3}
-              maxLength={600}
-              placeholder="I'm going to brunch with friends and want a 90s rom-com vibe…"
-              value={request}
-              onChange={(event) => setRequest(event.target.value)}
-            />
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                handleAsk(false);
+              }}
+            >
+              <label className="visually-hidden" htmlFor="darling-request">
+                Describe your plans
+              </label>
+              <textarea
+                id="darling-request"
+                className="dr-textarea"
+                rows={3}
+                maxLength={600}
+                placeholder="I'm going to brunch with friends and want a 90s rom-com vibe…"
+                value={request}
+                onChange={(event) => setRequest(event.target.value)}
+              />
 
-            <div className="od-chip-row dr-examples" aria-label="Example requests">
-              {EXAMPLE_REQUESTS.map((example) => (
-                <button key={example.label} type="button" className="od-chip" onClick={() => setRequest(example.text)}>
-                  {example.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="dr-forecast">
-              {forecast ? (
-                <span className="dr-forecast-chip">
-                  🌡️ {relativeDayLabel(forecast.date, today)}: {Math.round(forecast.high)}° / {Math.round(forecast.low)}°F
-                  {typeof forecast.rainChance === 'number' && ` · ${forecast.rainChance}% rain`}
-                  <button type="button" aria-label="Stop using the forecast" onClick={() => setForecast(null)}>
-                    ×
+              <div className="od-chip-row dr-examples" aria-label="Example requests">
+                {EXAMPLE_REQUESTS.map((example) => (
+                  <button key={example.label} type="button" className="od-chip" onClick={() => setRequest(example.text)}>
+                    {example.label}
                   </button>
-                </span>
-              ) : (
-                <>
-                  <label className="visually-hidden" htmlFor="forecast-date">
-                    Forecast date
-                  </label>
-                  <input
-                    id="forecast-date"
-                    type="date"
-                    className="dr-date-input"
-                    min={today}
-                    max={addDays(today, FORECAST_DAYS - 1)}
-                    value={forecastDate}
-                    onChange={(event) => setForecastDate(event.target.value)}
-                  />
-                  <button type="button" className="od-chip" onClick={checkForecast} disabled={checkingForecast || !forecastInRange}>
-                    {checkingForecast ? 'Checking…' : '📍 Use forecast'}
-                  </button>
-                </>
+                ))}
+              </div>
+
+              <div className="dr-forecast">
+                {forecast ? (
+                  <span className="dr-forecast-chip">
+                    🌡️ {relativeDayLabel(forecast.date, today)}: {Math.round(forecast.high)}° / {Math.round(forecast.low)}°F
+                    {typeof forecast.rainChance === 'number' && ` · ${forecast.rainChance}% rain`}
+                    <button type="button" aria-label="Stop using the forecast" onClick={() => setForecast(null)}>
+                      ×
+                    </button>
+                  </span>
+                ) : (
+                  <>
+                    <label className="visually-hidden" htmlFor="forecast-date">
+                      Forecast date
+                    </label>
+                    <input
+                      id="forecast-date"
+                      type="date"
+                      className="dr-date-input"
+                      min={today}
+                      max={addDays(today, FORECAST_DAYS - 1)}
+                      value={forecastDate}
+                      onChange={(event) => setForecastDate(event.target.value)}
+                    />
+                    <button type="button" className="od-chip" onClick={checkForecast} disabled={checkingForecast || !forecastInRange}>
+                      {checkingForecast ? 'Checking…' : '📍 Use forecast'}
+                    </button>
+                  </>
+                )}
+              </div>
+              {!forecast && !forecastInRange && (
+                <p className="dr-hint">Forecasts only go about two weeks ahead. Describe the weather instead.</p>
               )}
-            </div>
-            {!forecast && !forecastInRange && (
-              <p className="dr-hint">Forecasts only go about two weeks ahead. Describe the weather instead.</p>
-            )}
 
-            {askError && (
-              <p className="od-error" role="alert">
-                {askError}
-              </p>
-            )}
+              {askError && (
+                <p className="od-error" role="alert">
+                  {askError}
+                </p>
+              )}
 
-            <button type="submit" className="dr-ask-btn" disabled={asking}>
-              {asking ? 'Darling is thinking…' : '♡ Ask Darling'}
-            </button>
-          </form>
-        </section>
+              <button type="submit" className="dr-ask-btn" disabled={asking}>
+                {asking ? 'Darling is thinking…' : '♡ Ask Darling'}
+              </button>
+            </form>
+          </section>
+
+          {/* Only takes space once there's an answer (or the first one is loading). */}
+          <div className="dr-advice-slot" ref={adviceRef}>
+            {darling ? (
+              <DarlingCard darling={darling} closet={closet} changed={darling.signature !== signature} asking={asking} onTryAnother={() => handleAsk(true)} />
+            ) : (
+              asking && (
+                <AdviceFrame>
+                  <p className="dr-advice-loading" role="status">
+                    Darling is putting an outfit together…
+                  </p>
+                </AdviceFrame>
+              )
+            )}
+          </div>
+        </div>
 
         {/* ---------- The paper-doll outfit ---------- */}
-        <section className="dr-doll-area" ref={dollRef} aria-label="Your outfit">
-          <div className="dr-vibe">
-            <h3 className="dr-section-title">Choose your vibe</h3>
-            <div className="od-chip-row" role="group" aria-label="Aesthetic">
-              {aesthetics.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  className="od-chip"
-                  aria-pressed={aesthetic === option}
-                  onClick={() => setAesthetic(option)}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-            <div className="od-chip-row" role="group" aria-label="Weather">
-              {WEATHER_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className="od-chip"
-                  aria-pressed={weather === option.value}
-                  onClick={() => {
-                    setWeather(option.value);
-                    setWeatherChosen(true);
-                  }}
-                >
-                  <span aria-hidden="true">{option.icon}</span> {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
+        <section className="dr-doll-area" aria-label="Your outfit">
           <div className="dr-mode-toggle" role="group" aria-label="Outfit type">
             <button type="button" aria-pressed={mode === 'separates'} onClick={() => setMode('separates')}>
               Top + Bottom
@@ -484,11 +449,12 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
                     disabled={items.length < 2}
                     aria-label={`Previous ${label.toLowerCase()}`}
                   >
-                    ◀
+                    <img src={arrowLeftImage} alt="" />
                   </button>
                   <figure className="dr-piece">
-                    <figcaption className="dr-slot-label">
-                      {label}
+                    {/* The category name is for screen readers only; just the 1/3 count shows. */}
+                    <figcaption className={items.length > 1 ? 'dr-slot-label' : 'visually-hidden'}>
+                      <span className="visually-hidden">{label}</span>
                       {items.length > 1 && (
                         <span className="dr-count">
                           {position}/{items.length}
@@ -511,7 +477,7 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
                     disabled={items.length < 2}
                     aria-label={`Next ${label.toLowerCase()}`}
                   >
-                    ▶
+                    <img src={arrowRightImage} alt="" />
                   </button>
                 </div>
               );
@@ -520,7 +486,7 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
 
           {accessoryItems.length > 0 && (
             <div className="dr-accessories">
-              <span className="dr-slot-label">Accessories · optional</span>
+              <span className="visually-hidden">Accessories · optional</span>
               <div className="dr-accessory-row">
                 {accessoryItems.map((item) => (
                   <button
@@ -538,8 +504,6 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
               </div>
             </div>
           )}
-
-          {darling && <DarlingCard darling={darling} closet={closet} changed={darling.signature !== signature} asking={asking} onTryAnother={() => handleAsk(true)} />}
 
           <button type="button" className="dr-style-btn" onClick={styleMe} disabled={styling}>
             {styling ? 'Styling…' : '✧ Style Me! ✧'}
@@ -612,6 +576,18 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
   );
 }
 
+// The retro "♡ Darling's Advice" window that holds Darling's answer (or the loading note).
+function AdviceFrame({ warning = false, children }) {
+  return (
+    <section className={`dr-advice ${warning ? 'is-warning' : ''}`} aria-labelledby="darling-advice-title">
+      <h3 id="darling-advice-title" className="dr-advice-bar">
+        ♡ Darling&apos;s Advice
+      </h3>
+      <div className="dr-darling-card">{children}</div>
+    </section>
+  );
+}
+
 // Darling's explanation, styling tips and any honest warnings.
 function DarlingCard({ darling, closet, changed, asking, onTryAnother }) {
   const { result } = darling;
@@ -619,7 +595,7 @@ function DarlingCard({ darling, closet, changed, asking, onTryAnother }) {
   const pieces = outfitPieces(result.outfit, closet).filter((piece) => piece.item);
 
   return (
-    <div className={`dr-darling-card ${result.meetsRequest ? '' : 'is-warning'}`}>
+    <AdviceFrame warning={!result.meetsRequest}>
       <strong className="dr-darling-title">
         {result.meetsRequest ? 'Darling picked this for you! ♡' : "Darling's closest match ♡"}
       </strong>
@@ -670,6 +646,6 @@ function DarlingCard({ darling, closet, changed, asking, onTryAnother }) {
       <button type="button" className="od-chip" onClick={onTryAnother} disabled={asking}>
         {asking ? 'Thinking…' : '↻ Try Another'}
       </button>
-    </div>
+    </AdviceFrame>
   );
 }

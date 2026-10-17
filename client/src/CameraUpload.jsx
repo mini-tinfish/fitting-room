@@ -1,7 +1,5 @@
 import { useState } from 'react';
-
-// Where the backend lives. Can be changed later with an env variable.
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { API_URL } from './api/config';
 
 // Shrink a photo so it's small enough to send quickly.
 function resizeImage(file, maxSize = 1000) {

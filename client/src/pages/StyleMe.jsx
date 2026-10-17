@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-   import { getCloset } from '../closetStore';
+import { API_URL } from '../api/config';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 const SLOTS = ['top', 'bottom', 'shoes'];
 
-export default function StyleMe() {
-  const [closet, setCloset] = useState([]);
+// closet comes from App.jsx, so it always matches what My Closet shows.
+export default function StyleMe({ closet }) {
   const [aesthetics, setAesthetics] = useState([]);
   const [aesthetic, setAesthetic] = useState('');
   const [weather, setWeather] = useState('mild');
@@ -13,9 +12,8 @@ export default function StyleMe() {
   const [picks, setPicks] = useState({ top: 0, bottom: 0, shoes: 0 });
   const [status, setStatus] = useState('');
 
-  // Load the closet and the aesthetic menu when the page opens.
+  // Load the aesthetic menu when the page opens.
   useEffect(() => {
-    getCloset().then(setCloset);
     fetch(`${API_URL}/api/options`)
       .then((res) => res.json())
       .then((data) => {
@@ -38,10 +36,17 @@ export default function StyleMe() {
 
   // Ask the backend for an outfit, then point each row at what it picked.
   async function styleMe() {
+    // The backend rejects an empty closet, so explain instead of showing a generic error.
+    if (closet.length === 0) {
+      setStatus('Add some clothes in My Closet first.');
+      return;
+    }
+
     setStatus('Styling...');
     try {
       // Send only the item info, not the photos, to keep it fast.
-      const lightCloset = closet.map(({ image, ...info }) => info);
+      // JSON.stringify drops undefined fields, so the image is left out of the request.
+      const lightCloset = closet.map((item) => ({ ...item, image: undefined }));
 
       const response = await fetch(`${API_URL}/api/outfit`, {
         method: 'POST',
@@ -66,8 +71,6 @@ export default function StyleMe() {
 
   return (
     <div>
-      <h2>Style Me</h2>
-
       <label>
         Aesthetic{' '}
         <select value={aesthetic} onChange={(e) => setAesthetic(e.target.value)}>

@@ -1,6 +1,9 @@
+import { API_URL } from './config';
+
+// Gemini AI stylist. Not used on a page yet; kept for a future custom-prompt screen.
 export async function getOutfitRecommendation({ closet, occasion, aesthetic, weather }) {
   try {
-    const response = await fetch('http://localhost:5001/api/recommend-outfit', {
+    const response = await fetch(`${API_URL}/api/recommend-outfit`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

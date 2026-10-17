@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import './MyCloset.css'
 import { addItem, removeItem } from '../closetStore'
 import { removeBackground } from '../api/removeBackground'
+import removeButtonImage from '../assets/buttons/remove-button.png'
 
 const categories = [
   { value: 'all', label: 'All' },
@@ -279,9 +280,14 @@ async function handleRemove(id) {
                 type="button"
                 onClick={() => handleRemove(item.id)}
                 disabled={removingId !== null}
-                aria-label={`Remove ${item.name || item.category}`}
+                aria-busy={removingId === item.id}
+                aria-label={
+                  removingId === item.id
+                    ? `Removing ${item.name || item.category}…`
+                    : `Remove ${item.name || item.category}`
+                }
               >
-                {removingId === item.id ? 'Removing…' : 'Remove'}
+                <img src={removeButtonImage} alt="" />
               </button>
             </div>
           ))}

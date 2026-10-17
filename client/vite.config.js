@@ -17,16 +17,23 @@ export default defineConfig({
         display: 'standalone',
         start_url: '/',
         
+
 icons: [
-  // TODO: Replace this placeholder with custom Procreate pixel-art icons.
-  // Export final PNG icons at 192x192 and 512x512.
+  // Custom pixel-art cat mascot for The Fitting Room.
   {
-    src: '/icons.svg',
-    sizes: 'any',
-    type: 'image/svg+xml',
+    src: '/pwa-192x192.png',
+    sizes: '192x192',
+    type: 'image/png',
+    purpose: 'any'
+  },
+  {
+    src: '/pwa-512x512.png',
+    sizes: '512x512',
+    type: 'image/png',
     purpose: 'any'
   }
 ]
+
 
       }
     })

@@ -1,5 +1,6 @@
 
 import MyCloset from './pages/MyCloset'
+import StyleMe from './pages/StyleMe'
 import { useEffect, useState } from 'react'
 import { getCloset } from './closetStore'
 import './App.css'
@@ -12,9 +13,7 @@ import myClosetIcon from './assets/navigation/my_closet_icon.png'
 import styleMeIcon from './assets/navigation/style_me_icon.png'
 import myWeekIcon from './assets/navigation/my_week_icon.png'
 import lookbookIcon from './assets/navigation/lookbook_icon.png'
-import { getOutfitRecommendation } from './api/stylist'
-import StyleMeCarousel from './pages/StyleMe';
-import LookbookGrid from './pages/MyLooks';
+import LookbookGrid from './pages/MyLooks'
 
 const tabs = [
   { id: 'closet', label: 'My Closet', icon: '👚', image: myClosetLabel, iconImage: myClosetIcon },
@@ -29,12 +28,6 @@ function App() {
   const [closet, setCloset] = useState([])
   const [closetLoading, setClosetLoading] = useState(true)
   const [closetError, setClosetError] = useState('')
-  const [occasion] = useState('')
-  const [aesthetic] = useState('')
-  const [weather] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [recommendedIds, setRecommendedIds] = useState([])
-  const [stylistNote, setStylistNote] = useState('')
 
   // Read saved clothes from IndexedDB. This only reads, so it never overwrites stored data.
   function fetchCloset(isCancelled = () => false) {
@@ -62,25 +55,6 @@ function App() {
     setClosetLoading(true)
     setClosetError('')
     fetchCloset()
-  }
-
-  async function handleStyleMe() {
-    setLoading(true);
-    try {
-      const result = await getOutfitRecommendation({ closet, occasion, aesthetic, weather });
-      setRecommendedIds(result.selectedItemIds);
-      setStylistNote(result.stylistComment);
-    } catch {
-      // Fallback logic: Pick 1 Top, 1 Bottom, and 1 Pair of Shoes randomly from closet
-      const fallbackTop = closet.find(i => i.category === 'top')?.id;
-      const fallbackBottom = closet.find(i => i.category === 'bottom')?.id;
-      const fallbackShoes = closet.find(i => i.category === 'shoes')?.id;
-
-      setRecommendedIds([fallbackTop, fallbackBottom, fallbackShoes].filter(Boolean));
-      setStylistNote("Here's a quick staple combo from your wardrobe!");
-    } finally {
-      setLoading(false);
-    }
   }
 
   return (
@@ -149,26 +123,23 @@ function App() {
     className="page-title-image"
   />
 </h2>
-            <p>Your personal stylist is almost ready.</p>
+            <p>Pick a vibe and the weather, or flip through your pieces.</p>
 
-            <div className="placeholder-card">
-              <span className="placeholder-icon">✨</span>
-              <h3>Find your fit</h3>
-              <p>Outfit recommendations based on your wardrobe, vibe, and weather.</p>
-              <button type="button" onClick={handleStyleMe} disabled={loading}>
-                {loading ? 'Styling…' : 'Generate outfit'}
-              </button>
-
-              {stylistNote && <p>{stylistNote}</p>}
-              {recommendedIds.length > 0 && (
-                <ul>
-                  {recommendedIds.map((id) => (
-                    <li key={id}>{id}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-               <StyleMeCarousel />
+            {/* Same gate as My Closet: wait until saved clothes are loaded. */}
+            {closetLoading ? (
+              <div className="placeholder-card">
+                <p>Opening your wardrobe…</p>
+              </div>
+            ) : closetError ? (
+              <div className="placeholder-card" role="alert">
+                <p>{closetError}</p>
+                <button type="button" onClick={retryLoadCloset}>
+                  Try again
+                </button>
+              </div>
+            ) : (
+              <StyleMe closet={closet} />
+            )}
           </section>
         )}
 

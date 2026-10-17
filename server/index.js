@@ -81,6 +81,54 @@ app.post('/api/remove-background', async (req, res) => {
     res.status(500).json({ error: 'Something went wrong removing the background.' });
   }
 });
+// Get the weather for a place and date, as "hot", "mild", or "cold".
+app.get('/api/weather', async (req, res) => {
+  try {
+    // date is optional, like "2026-10-24". No date = today.
+    const { lat, lon, date } = req.query;
+
+    if (!lat || !lon) {
+      return res.status(400).json({ error: 'Please send lat and lon.' });
+    }
+
+    // Build the Open-Meteo request.
+    const url = new URL('https://api.open-meteo.com/v1/forecast');
+    url.searchParams.set('latitude', lat);
+    url.searchParams.set('longitude', lon);
+    url.searchParams.set('daily', 'temperature_2m_max,temperature_2m_min,precipitation_probability_max');
+    url.searchParams.set('temperature_unit', 'fahrenheit');
+    url.searchParams.set('timezone', 'auto');
+    if (date) {
+      url.searchParams.set('start_date', date);
+      url.searchParams.set('end_date', date);
+    } else {
+      url.searchParams.set('forecast_days', '1');
+    }
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      const details = await response.text();
+      console.error('Open-Meteo error:', response.status, details);
+      return res.status(502).json({ error: 'Could not get the weather. Forecasts only go about 2 weeks ahead.' });
+    }
+
+    const data = await response.json();
+    const high = data.daily.temperature_2m_max[0];
+    const low = data.daily.temperature_2m_min[0];
+    const rainChance = data.daily.precipitation_probability_max[0];
+
+    // Turn the high temperature into a word the outfit picker understands.
+    let weather = 'cold';
+    if (high >= 80) weather = 'hot';
+    else if (high >= 60) weather = 'mild';
+
+    res.json({ date: data.daily.time[0], high, low, rainChance, weather });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Something went wrong getting the weather.' });
+  }
+});
 // TODO: Add Gemini AI outfit recommendations here.
 
 app.listen(PORT, () => {

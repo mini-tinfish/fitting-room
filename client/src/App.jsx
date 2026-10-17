@@ -1,4 +1,5 @@
 
+import MyCloset from './pages/MyCloset'
 import { useState } from 'react'
 import './App.css'
 import fittingRoomTitle from './assets/branding/fitting-room-title.png'
@@ -22,7 +23,7 @@ const tabs = [
 
 function App() {
   const [activeTab, setActiveTab] = useState('closet')
-  const [closet] = useState([])
+  const [closet, setCloset] = useState([])
   const [occasion] = useState('')
   const [aesthetic] = useState('')
   const [weather] = useState('')
@@ -87,13 +88,7 @@ function App() {
 </h2>
             <p>All your favorite pieces, in one little place.</p>
 
-            <div className="placeholder-card">
-              <span className="placeholder-icon">👗</span>
-              <h3>Your closet awaits!</h3>
-              <p>Start adding your favorite clothing pieces.</p>
-              {/* TODO: Connect to wardrobe upload functionality */}
-              <button type="button" disabled>Add clothing — coming soon</button>
-            </div>
+            <MyCloset clothes={closet} setClothes={setCloset} />
           </section>
         )}
 

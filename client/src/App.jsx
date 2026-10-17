@@ -10,6 +10,7 @@ import myClosetIcon from './assets/navigation/my_closet_icon.png'
 import styleMeIcon from './assets/navigation/style_me_icon.png'
 import myWeekIcon from './assets/navigation/my_week_icon.png'
 import lookbookIcon from './assets/navigation/lookbook_icon.png'
+import { getOutfitRecommendation } from './api/stylist'
 
 const tabs = [
   { id: 'closet', label: 'My Closet', icon: '👚', image: myClosetLabel, iconImage: myClosetIcon },
@@ -21,6 +22,32 @@ const tabs = [
 
 function App() {
   const [activeTab, setActiveTab] = useState('closet')
+  const [closet] = useState([])
+  const [occasion] = useState('')
+  const [aesthetic] = useState('')
+  const [weather] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [recommendedIds, setRecommendedIds] = useState([])
+  const [stylistNote, setStylistNote] = useState('')
+
+  async function handleStyleMe() {
+    setLoading(true);
+    try {
+      const result = await getOutfitRecommendation({ closet, occasion, aesthetic, weather });
+      setRecommendedIds(result.selectedItemIds);
+      setStylistNote(result.stylistComment);
+    } catch {
+      // Fallback logic: Pick 1 Top, 1 Bottom, and 1 Pair of Shoes randomly from closet
+      const fallbackTop = closet.find(i => i.category === 'tops')?.id;
+      const fallbackBottom = closet.find(i => i.category === 'bottoms')?.id;
+      const fallbackShoes = closet.find(i => i.category === 'shoes')?.id;
+
+      setRecommendedIds([fallbackTop, fallbackBottom, fallbackShoes].filter(Boolean));
+      setStylistNote("Here's a quick staple combo from your wardrobe!");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="app-shell">
@@ -86,8 +113,18 @@ function App() {
               <span className="placeholder-icon">✨</span>
               <h3>Find your fit</h3>
               <p>Outfit recommendations based on your wardrobe, vibe, and weather.</p>
-              {/* TODO: Connect Gemini recommendations */}
-              <button type="button" disabled>Generate outfit — coming soon</button>
+              <button type="button" onClick={handleStyleMe} disabled={loading}>
+                {loading ? 'Styling…' : 'Generate outfit'}
+              </button>
+
+              {stylistNote && <p>{stylistNote}</p>}
+              {recommendedIds.length > 0 && (
+                <ul>
+                  {recommendedIds.map((id) => (
+                    <li key={id}>{id}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           </section>
         )}

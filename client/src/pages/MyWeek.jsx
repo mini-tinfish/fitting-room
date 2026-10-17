@@ -4,13 +4,15 @@ import RetroModal from '../components/RetroModal'
 import OutfitStrip from '../components/OutfitStrip'
 import { SLOT_LABELS, normalizeOutfit, outfitPieces } from '../outfit'
 import { daysBetween, formatDate, relativeDayLabel, toDateKey, upcomingDays } from '../dates'
+import plusButtonImage from '../assets/buttons/outfit_weekday_plus.png'
+import pushPinImage from '../assets/buttons/push_pin_weekly.png'
 import './MyWeek.css'
 
 // My Week shows today plus the next six days, rolling forward every day.
 // Plans further ahead stay saved and slide into view once their date is within the week.
 export default function MyWeek({ closet, looks, plans, onAddPlan, onUpdatePlan, onRemovePlan, onEditOutfit, onBuildForDate }) {
   const [today, setToday] = useState(() => toDateKey())
-  // { kind: 'choose' | 'fromLook' | 'reschedule' | 'view', date?, look?, plan? }
+  // { kind: 'day' | 'choose' | 'fromLook' | 'reschedule' | 'view', date?, look?, plan? }
   const [dialog, setDialog] = useState(null)
   const [confirmRemoveId, setConfirmRemoveId] = useState(null)
   const [removingId, setRemovingId] = useState(null)
@@ -36,6 +38,8 @@ export default function MyWeek({ closet, looks, plans, onAddPlan, onUpdatePlan, 
   )
   const plansOn = (day) => sorted.filter((plan) => plan.date === day)
   const later = sorted.filter((plan) => plan.date > lastDay)
+  // Re-read live, so the day pop-up updates when a plan in it is removed or moved.
+  const dayDialogPlans = dialog?.kind === 'day' ? plansOn(dialog.date) : []
 
   function whereItShows(date) {
     if (date > lastDay) return ` It will show up here when ${formatDate(date)} is within the week.`
@@ -91,28 +95,46 @@ export default function MyWeek({ closet, looks, plans, onAddPlan, onUpdatePlan, 
       <div className="week-grid">
         {days.map((day) => {
           const dayPlans = plansOn(day)
-          const firstPiece = dayPlans
-            .flatMap((plan) => outfitPieces(plan.outfit, closet))
-            .find((piece) => piece.item && piece.slot !== 'accessory')
+          const weekday = formatDate(day, { weekday: 'long' })
+          // The card holds two buttons (a button can't sit inside another):
+          // the day and date scroll to that day on the corkboard; the plus opens its outfits.
           return (
-            <button
-              type="button"
+            <div
               className={`day-card ${day === today ? 'is-today' : ''} ${dayPlans.length ? 'has-plans' : ''}`}
               key={day}
-              onClick={() => jumpTo(day)}
-              aria-label={`${formatDate(day, { weekday: 'long', month: 'long', day: 'numeric' })}: ${
-                dayPlans.length ? `${dayPlans.length} planned` : 'nothing planned'
-              }`}
             >
-              <span>{formatDate(day, { weekday: 'short' })}</span>
-              <strong>{Number(day.slice(8))}</strong>
-              {firstPiece ? (
-                <img className="day-card-thumb" src={firstPiece.item.image} alt="" />
-              ) : (
-                <span className="day-card-empty" aria-hidden="true">👗</span>
+              <button
+                type="button"
+                className="day-card-jump"
+                onClick={() => jumpTo(day)}
+                aria-label={`${formatDate(day, { weekday: 'long', month: 'long', day: 'numeric' })}: ${
+                  dayPlans.length ? `${dayPlans.length} planned` : 'nothing planned'
+                }`}
+              >
+                <span>{formatDate(day, { weekday: 'short' })}</span>
+                <strong>{Number(day.slice(8))}</strong>
+              </button>
+              {dayPlans.length > 0 && (
+                <button
+                  type="button"
+                  className="day-card-plus"
+                  onClick={() => setDialog({ kind: 'day', date: day })}
+                  aria-haspopup="dialog"
+                  aria-label={
+                    dayPlans.length === 1
+                      ? `View the outfit planned for ${weekday}`
+                      : `View ${dayPlans.length} outfits planned for ${weekday}`
+                  }
+                >
+                  <img src={plusButtonImage} alt="" />
+                  {dayPlans.length > 1 && (
+                    <span className="day-card-count" aria-hidden="true">
+                      {dayPlans.length}
+                    </span>
+                  )}
+                </button>
               )}
-              {dayPlans.length > 1 && <span className="day-card-count">+{dayPlans.length - 1}</span>}
-            </button>
+            </div>
           )
         })}
       </div>
@@ -166,6 +188,31 @@ export default function MyWeek({ closet, looks, plans, onAddPlan, onUpdatePlan, 
             ))}
           </div>
         </details>
+      )}
+
+      {/* Opened by a weekday's plus button: every outfit planned that day, as the same
+          corkboard cards (View, Change date, Edit outfit, Remove all work from here). */}
+      {dialog?.kind === 'day' && (
+        <RetroModal
+          title={`♡ Planned for ${formatDate(dialog.date, { weekday: 'long', month: 'short', day: 'numeric' })}`}
+          onClose={() => setDialog(null)}
+          wide
+        >
+          <div className="od-form">
+            {dayDialogPlans.length === 0 ? (
+              <p className="od-field-hint">Nothing is planned for this day anymore.</p>
+            ) : (
+              <div className="week-day-plans">
+                {dayDialogPlans.map((plan) => (
+                  <PlanCard key={plan.id} plan={plan} {...cardProps} />
+                ))}
+              </div>
+            )}
+            <button type="button" className="od-secondary-btn" onClick={() => setDialog({ kind: 'choose', date: dialog.date })}>
+              + Plan another outfit
+            </button>
+          </div>
+        </RetroModal>
       )}
 
       {dialog?.kind === 'choose' && (
@@ -268,7 +315,7 @@ function PlanCard({ plan, closet, showDate = false, confirmRemoveId, removingId,
 
   return (
     <article className="plan-card">
-      <span className="plan-pin" aria-hidden="true" />
+      <img className="plan-pin" src={pushPinImage} alt="" />
       {showDate && <span className="plan-date">{formatDate(plan.date, { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })}</span>}
       <strong className="plan-title">{plan.occasion || 'Planned outfit'}</strong>
       <button type="button" className="plan-preview" onClick={() => onView(plan)} aria-label={`View ${plan.occasion || 'planned outfit'}`}>

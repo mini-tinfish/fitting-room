@@ -1,184 +1,316 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
 
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+/* TODO: Replace temporary styling with our original visual designs. */
+
+:root {
+  --pink: #f3bfd3;
+  --cream: #fff9f5;
+  --plum: #493349;
+  --text-muted: #806f7e;
+  --border: #eedce6;
 }
 
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
+#root {
+  min-height: 100vh;
 }
 
-#center {
+
+/* Custom vintage wallpaper — designed for all four pages */
+.app-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: #f5f7ed;
+  background-image: url('./assets/background_page.png');
+  background-repeat: repeat;
+  background-size: 360px auto;
+  background-position: top left;
+  color: var(--plum);
+  padding-bottom: 100px;
+}
+
+
+.app-header {
   display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 24px;
+  background: #fce4ee;
+  border-bottom: 2px solid var(--border);
 }
 
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+h1, h2, h3, p {
+  margin-top: 0;
 }
 
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+h1 {
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  margin-bottom: 0;
 }
 
-#next-steps ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
+.eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: #a06b87;
 }
 
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
+
+/* Pixel-art cat mascot */
+.mascot-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .mascot-logo {
+    width: 48px;
     height: 48px;
   }
 }
 
-.ticks {
-  position: relative;
+
+.app-main {
+  width: min(100% - 32px, 900px);
+  margin: 0 auto;
+  padding: 36px 0;
+}
+
+.page > p:not(.eyebrow) {
+  color: var(--text-muted);
+}
+
+.placeholder-card {
+  margin-top: 28px;
+  padding: 40px 24px;
+  background: white;
+  border: 2px dashed #e8bfd2;
+  border-radius: 22px;
+  text-align: center;
+}
+
+.placeholder-icon {
+  display: block;
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.placeholder-card p {
+  color: var(--text-muted);
+}
+
+.placeholder-card button {
+  margin-top: 12px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--pink);
+  color: var(--plum);
+  font-weight: 700;
+}
+
+.placeholder-card button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px max(12px, env(safe-area-inset-right))
+    calc(12px + env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-left));
+  background: white;
+  border-top: 2px solid var(--border);
+  z-index: 10;
+}
+
+.nav-item {
+  width: min(33%, 160px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 0;
+  border-radius: 12px;
+  padding: 8px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.nav-item.active {
+  background: #fce4ee;
+  color: var(--plum);
+  font-weight: 700;
+}
+
+.nav-icon {
+  font-size: 1.4rem;
+}
+
+@media (min-width: 768px) {
+  .app-header {
+    padding-inline: max(32px, calc((100vw - 1000px) / 2));
+  }
+
+  .app-main {
+    padding-top: 56px;
+  }
+}
+
+/* TODO: Customize with original calendar artwork later. */
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 24px;
+}
+
+.day-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 2px;
+  background: #fce4ee;
+  border: 1px solid #eed0df;
+  border-radius: 12px;
+  color: #493349;
+  font-size: 0.8rem;
+}
+
+.day-card strong {
+  font-size: 1.1rem;
+}
+
+/* Accommodate four navigation tabs. */
+.nav-item {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  max-width: 160px;
+}
+
+@media (max-width: 480px) {
+  .bottom-nav {
+    gap: 2px;
+  }
+
+  .nav-item {
+    font-size: 0.65rem;
+    padding: 8px 2px;
+  }
+
+  .day-card {
+    font-size: 0.65rem;
+    gap: 8px;
+    padding: 12px 1px;
+  }
+}
+
+
+/* Custom pixel-cursive title */
+.title-wrap {
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.title-image {
+  display: block;
   width: 100%;
+  max-width: 420px;
+  height: auto;
+  object-fit: contain;
+}
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
+@media (max-width: 480px) {
+  .title-image {
+    max-width: 250px;
   }
+}
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
+/* Custom Procreate navigation lettering */
+.nav-label-image {
+  display: block;
+  width: 100%;
+  max-width: 110px;
+  height: 28px;
+  object-fit: contain;
+}
+
+@media (max-width: 480px) {
+  .nav-label-image {
+    max-width: 75px;
+    height: 24px;
   }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
+}
+
+
+/* Original Procreate pixel-cursive page headings */
+.page-title {
+  margin: 12px 0 20px;
+  display: flex;
+  align-items: center;
+}
+
+.page-title-image {
+  display: block;
+  width: auto;
+  max-width: min(100%, 400px);
+  height: 80px;
+  object-fit: contain;
+  object-position: left center;
+  image-rendering: pixelated;
+}
+
+@media (max-width: 480px) {
+  .page-title-image {
+    max-width: 100%;
+    height: 60px;
+  }
+}
+
+
+/* Custom Procreate pixel-art navigation icons */
+.nav-icon-image {
+  display: block;
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+@media (max-width: 480px) {
+  .nav-icon-image {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+
+/* Keeps content readable over the patterned wallpaper */
+.page {
+  background: rgba(255, 249, 245, 0.92);
+  border: 1px solid rgba(232, 191, 210, 0.75);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 6px 20px rgba(73, 51, 73, 0.06);
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 20px 16px;
+    border-radius: 18px;
   }
 }

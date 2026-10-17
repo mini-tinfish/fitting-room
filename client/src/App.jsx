@@ -1,122 +1,200 @@
+
 import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
 import './App.css'
+import fittingRoomTitle from './assets/branding/fitting-room-title.png'
+import lookbookLabel from './assets/navigation/lookbook.png'
+import myWeekLabel from './assets/navigation/my_week.png'
+import styleMeLabel from './assets/navigation/style_me.png'
+import myClosetLabel from './assets/navigation/my_closet.png'
+import myClosetIcon from './assets/navigation/my_closet_icon.png'
+import styleMeIcon from './assets/navigation/style_me_icon.png'
+import myWeekIcon from './assets/navigation/my_week_icon.png'
+import lookbookIcon from './assets/navigation/lookbook_icon.png'
+
+const tabs = [
+  { id: 'closet', label: 'My Closet', icon: '👚', image: myClosetLabel, iconImage: myClosetIcon },
+  { id: 'style', label: 'Style Me', icon: '✨', image: styleMeLabel, iconImage: styleMeIcon },
+  { id: 'planner', label: 'My Week', icon: '📅', image: myWeekLabel, iconImage: myWeekIcon},
+  { id: 'saved', label: 'Lookbook', icon: '♡', image: lookbookLabel, iconImage: lookbookIcon },
+]
+
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [activeTab, setActiveTab] = useState('closet')
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
+    <div className="app-shell">
+      <header className="app-header">
         <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+          <p className="eyebrow">YOUR DIGITAL WARDROBE</p>
+          
+<h1 className="title-wrap">
+  <img
+    src={fittingRoomTitle}
+    alt="The Fitting Room"
+    className="title-image"
+  />
+</h1>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        
+{/* Our original pixel-art cat mascot */}
+<img
+  src="/pwa-192x192.png"
+  alt="The Fitting Room pixel cat mascot"
+  className="mascot-logo"
+/>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      </header>
+
+      <main className="app-main">
+        {activeTab === 'closet' && (
+          <section className="page">
+            <p className="eyebrow">WELCOME TO YOUR WARDROBE</p>
+            <h2 className="page-title">
+  <img
+    src={myClosetLabel}
+    alt="My Closet"
+    className="page-title-image"
+  />
+</h2>
+            <p>All your favorite pieces, in one little place.</p>
+
+            <div className="placeholder-card">
+              <span className="placeholder-icon">👗</span>
+              <h3>Your closet awaits!</h3>
+              <p>Start adding your favorite clothing pieces.</p>
+              {/* TODO: Connect to wardrobe upload functionality */}
+              <button type="button" disabled>Add clothing — coming soon</button>
+            </div>
+          </section>
+        )}
+
+        {activeTab === 'style' && (
+          <section className="page">
+            <p className="eyebrow">LET'S GET DRESSED</p>
+            <h2 className="page-title">
+  <img
+    src={styleMeLabel}
+    alt="Style Me"
+    className="page-title-image"
+  />
+</h2>
+            <p>Your personal stylist is almost ready.</p>
+
+            <div className="placeholder-card">
+              <span className="placeholder-icon">✨</span>
+              <h3>Find your fit</h3>
+              <p>Outfit recommendations based on your wardrobe, vibe, and weather.</p>
+              {/* TODO: Connect Gemini recommendations */}
+              <button type="button" disabled>Generate outfit — coming soon</button>
+            </div>
+          </section>
+        )}
+
+        {activeTab === 'saved' && (
+          <section className="page">
+            <p className="eyebrow">THE LOOKBOOK</p>
+            <h2 className="page-title">
+  <img
+    src={lookbookLabel}
+    alt="Lookbook"
+    className="page-title-image"
+  />
+</h2>
+            <p>Keep the outfits you love.</p>
+
+            <div className="placeholder-card">
+              <span className="placeholder-icon">♡</span>
+              <h3>No saved looks yet</h3>
+              <p>Your favorite combinations will appear here.</p>
+              {/* TODO: Connect saved outfits */}
+            </div>
+          </section>
+        )}
+
+        
+{activeTab === 'planner' && (
+  <section className="page">
+    <p className="eyebrow">YOUR WEEKLY LOOKBOOK</p>
+    <h2 className="page-title">
+  <img
+    src={myWeekLabel}
+    alt="My Week"
+    className="page-title-image"
+  />
+</h2>
+    <p>Seven days, seven looks. Plan what to wear!</p>
+
+    <div className="week-grid">
+      {Array.from({ length: 7 }, (_, index) => {
+        const date = new Date()
+        date.setDate(date.getDate() + index)
+
+        return (
+          <div className="day-card" key={index}>
+            <span>
+              {date.toLocaleDateString('en-US', {
+                weekday: 'short',
+              })}
+            </span>
+            <strong>{date.getDate()}</strong>
+            <span>👗</span>
+          </div>
+        )
+      })}
+    </div>
+
+    <div className="placeholder-card">
+      <span className="placeholder-icon">📅</span>
+      <h3>Your weekly fits await!</h3>
+      <p>
+        Soon you'll be able to assign outfits to each
+        day and plan around the weather.
+      </p>
+      {/* TODO: Add outfit scheduling, weather, and Gemini. */}
+    </div>
+  </section>
+)}
+
+      </main>
+
+      <nav className="bottom-nav" aria-label="Main navigation">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            className={`nav-item ${activeTab === tab.id ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
+            aria-current={activeTab === tab.id ? 'page' : undefined}
+          >
+            
+{tab.iconImage ? (
+  <img
+    src={tab.iconImage}
+    alt=""
+    className="nav-icon-image"
+  />
+) : (
+  <span className="nav-icon">{tab.icon}</span>
+)}
+
+            {tab.image ? (
+  <img
+    src={tab.image}
+    alt=""
+    className="nav-label-image"
+  />
+) : (
+  <span>{tab.label}</span>
+)}
+          </button>
+        ))}
+      </nav>
+    </div>
   )
 }
 
 export default App
+
+

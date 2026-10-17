@@ -28,13 +28,26 @@
 }
 
 
+/* Title and subtitle centered across the full header width. */
 .app-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 28px 24px;
   background: #fce4ee;
   border-bottom: 2px solid var(--border);
+}
+
+.app-header-brand {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.app-header-subtitle {
+  margin: 10px 0 0;
 }
 
 h1, h2, h3, p {
@@ -53,22 +66,6 @@ h1 {
   color: #a06b87;
 }
 
-
-/* Pixel-art cat mascot */
-.mascot-logo {
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
-  image-rendering: pixelated;
-  flex-shrink: 0;
-}
-
-@media (max-width: 480px) {
-  .mascot-logo {
-    width: 48px;
-    height: 48px;
-  }
-}
 
 
 .app-main {
@@ -221,9 +218,11 @@ h1 {
 
 /* Custom pixel-cursive title */
 .title-wrap {
+  width: 100%;
   margin: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .title-image {

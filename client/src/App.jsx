@@ -148,27 +148,19 @@ function App() {
 
   return (
     <div className="app-shell">
+      {/* Title artwork with the subtitle centered underneath. The cat mascot (pwa-192x192.png)
+          is no longer shown here but is still the favicon and app icon. */}
       <header className="app-header">
-        <div>
-          <p className="eyebrow">YOUR DIGITAL WARDROBE</p>
-          
-<h1 className="title-wrap">
-  <img
-    src={fittingRoomTitle}
-    alt="The Fitting Room"
-    className="title-image"
-  />
-</h1>
-
+        <div className="app-header-brand">
+          <h1 className="title-wrap">
+            <img
+              src={fittingRoomTitle}
+              alt="The Fitting Room"
+              className="title-image"
+            />
+          </h1>
+          <p className="eyebrow app-header-subtitle">YOUR DIGITAL WARDROBE</p>
         </div>
-        
-{/* Our original pixel-art cat mascot */}
-<img
-  src="/pwa-192x192.png"
-  alt="The Fitting Room pixel cat mascot"
-  className="mascot-logo"
-/>
-
       </header>
 
       <main className="app-main">

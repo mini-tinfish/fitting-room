@@ -253,10 +253,63 @@
   object-fit: contain;
 }
 
+/* Custom Procreate "Upload Clothing" artwork, shown as drawn. */
+.closet-photo-upload img.closet-upload-art {
+  width: 160px;
+  height: auto;
+  transition: transform 0.15s ease;
+}
+
+.closet-photo-upload:hover img.closet-upload-art {
+  transform: scale(1.04);
+}
+
+/* The real file input stays in the tab order for keyboards and screen readers,
+   but is visually hidden; clicking anywhere in the label opens the picker. */
+.closet-upload-form .closet-photo-upload input[type='file'] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.closet-photo-upload {
+  position: relative;
+}
+
+.closet-photo-upload:focus-within {
+  outline: 2px solid #c58ca8;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .closet-photo-upload img.closet-upload-art {
+    transition: none;
+  }
+
+  .closet-photo-upload:hover img.closet-upload-art {
+    transform: none;
+  }
+}
+
+/* Category is short; Fabric Weight's descriptions need the extra width. */
 .closet-form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr);
   gap: 12px;
+}
+
+/* Fabric Weight is grayed out for shoes. */
+.closet-upload-form select:disabled {
+  background: #f3eef1;
+  border-color: #e4d9df;
+  color: #a596a0;
+  cursor: not-allowed;
 }
 
 .closet-save-btn {

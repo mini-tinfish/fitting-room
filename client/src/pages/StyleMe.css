@@ -1,0 +1,599 @@
+/* Darling's dressing room: a retro desktop window holding a paper-doll outfit.
+   Window chrome matches .closet-window in MyCloset.css. */
+
+.dressing-room {
+  background: #fffaf7;
+  border: 2px solid #dcb9cb;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 5px 6px 0 #e3cbd6;
+}
+
+.dr-window-bar {
+  display: flex;
+  justify-content: space-between;
+  background: #efc9dc;
+  padding: 12px 16px;
+  color: #593a50;
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.dr-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  background: #fff1d6;
+  border-bottom: 1px dashed #e2c38f;
+  font-size: 0.85rem;
+}
+
+.dr-banner p {
+  margin: 0;
+}
+
+.dr-banner .od-secondary-btn {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+.dr-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+  grid-template-areas: 'doll ask';
+  gap: 22px;
+  padding: 22px;
+}
+
+.dr-section-title {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  color: var(--plum);
+}
+
+.dr-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.dr-center {
+  text-align: center;
+}
+
+/* ---------- The doll column ---------- */
+
+.dr-doll-area {
+  grid-area: doll;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  scroll-margin-top: 16px;
+}
+
+.dr-vibe {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.dr-vibe .od-chip-row {
+  justify-content: center;
+}
+
+.dr-mode-toggle {
+  display: inline-flex;
+  padding: 3px;
+  background: #fbe8f1;
+  border: 1px solid #e2c5d4;
+  border-radius: 999px;
+}
+
+.dr-mode-toggle button {
+  padding: 7px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #65455a;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.dr-mode-toggle button[aria-pressed='true'] {
+  background: #fff;
+  color: var(--plum);
+  font-weight: 700;
+  box-shadow: 2px 2px 0 #e3cbd6;
+}
+
+/* The paper doll: pieces stacked top to bottom on a dotted backdrop. */
+.dr-doll {
+  width: min(100%, 380px);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 8px;
+  background-color: #fff;
+  background-image: radial-gradient(#f3d6e4 1px, transparent 1px);
+  background-size: 14px 14px;
+  border: 2px dashed #e8bfd2;
+  border-radius: 18px;
+}
+
+.dr-slot {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 6px;
+}
+
+.dr-piece {
+  position: relative;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+.dr-slot-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #a06b87;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.dr-piece .dr-slot-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  padding: 2px 8px;
+  background: #fce4ee;
+  border-radius: 999px;
+}
+
+.dr-count {
+  color: var(--text-muted);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.dr-piece-frame {
+  width: 100%;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dr-slot-dress .dr-piece-frame {
+  height: 270px;
+}
+
+.dr-slot-shoes .dr-piece-frame {
+  height: 96px;
+}
+
+/* object-fit: contain so clothing photos are never cropped. */
+.dr-piece-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(2px 3px 0 rgba(73, 51, 73, 0.12));
+}
+
+.dr-piece-empty {
+  padding: 10px 14px;
+  border: 1px dashed #dcb2c8;
+  border-radius: 10px;
+  background: #f9edf2;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.dr-piece-name {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dr-arrow {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: #fce4ee;
+  border: 1px solid #dcb9cb;
+  border-radius: 50%;
+  box-shadow: 2px 2px 0 #e3cbd6;
+  color: var(--plum);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.dr-arrow:active:not(:disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 #e3cbd6;
+}
+
+.dr-arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+  box-shadow: none;
+}
+
+/* Optional accessories: tap to add or remove. */
+.dr-accessories {
+  width: min(100%, 380px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.dr-accessory-row {
+  max-width: 100%;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 6px;
+}
+
+.dr-accessory {
+  flex: 0 0 auto;
+  width: 54px;
+  height: 54px;
+  padding: 4px;
+  background: #fff;
+  border: 2px solid #ead4df;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.dr-accessory img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.dr-accessory[aria-pressed='true'] {
+  border-color: #c58ca8;
+  background: #fce4ee;
+  box-shadow: 2px 2px 0 #d3a9bf;
+}
+
+.dr-style-btn {
+  min-width: 200px;
+  padding: 13px 26px;
+  background: #e9bfd4;
+  border: 2px solid #c58ca8;
+  border-radius: 999px;
+  box-shadow: 4px 4px 0 #bd98ab;
+  color: var(--plum);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.dr-style-btn:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #bd98ab;
+}
+
+.dr-style-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.dr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* ---------- Ask Darling panel ---------- */
+
+.dr-ask {
+  grid-area: ask;
+  align-self: start;
+  position: sticky;
+  top: 16px;
+  padding: 16px;
+  background: #fdf0f6;
+  border: 1px solid #ead4df;
+  border-radius: 14px;
+}
+
+.dr-ask form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.dr-textarea {
+  width: 100%;
+  padding: 11px 12px;
+  background: #fff;
+  border: 1px solid #dec5d1;
+  border-radius: 10px;
+  color: var(--plum);
+  font: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.dr-examples .od-chip {
+  padding: 5px 10px;
+  font-size: 0.72rem;
+}
+
+.dr-forecast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.dr-date-input {
+  padding: 6px 8px;
+  background: #fff;
+  border: 1px solid #dec5d1;
+  border-radius: 8px;
+  color: var(--plum);
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.dr-forecast-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px 5px 10px;
+  background: #fff;
+  border: 1px solid #e2c5d4;
+  border-radius: 999px;
+  font-size: 0.75rem;
+}
+
+.dr-forecast-chip button {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.dr-ask-btn {
+  padding: 12px 16px;
+  background: var(--plum);
+  border: 2px solid var(--plum);
+  border-radius: 10px;
+  box-shadow: 3px 3px 0 #c58ca8;
+  color: var(--cream);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dr-ask-btn:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+/* Darling's answer, shown under the outfit it picked. */
+.dr-darling-card {
+  width: min(100%, 420px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 2px dashed #e8bfd2;
+  border-radius: 14px;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.dr-darling-card p {
+  margin: 0;
+}
+
+.dr-darling-card.is-warning {
+  border-color: #e0a8a8;
+  background: #fff8f6;
+}
+
+.dr-darling-title {
+  color: var(--plum);
+  font-size: 0.95rem;
+}
+
+.dr-heard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.dr-heard span {
+  padding: 3px 8px;
+  background: #f9e9f1;
+  border-radius: 999px;
+  color: #815974;
+  font-size: 0.68rem;
+}
+
+.dr-picked,
+.dr-tips,
+.dr-limitations ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dr-picked span {
+  color: var(--text-muted);
+}
+
+.dr-tips {
+  color: #815974;
+}
+
+.dr-limitations {
+  width: 100%;
+  padding: 10px 12px;
+  background: #fdeceb;
+  border-radius: 10px;
+  color: #7d2f45;
+}
+
+.dr-limitations ul {
+  margin-top: 4px;
+}
+
+.dr-limitations li + li {
+  margin-top: 4px;
+}
+
+.dr-limitations p {
+  margin-top: 6px;
+}
+
+/* ---------- Empty closet ---------- */
+
+.dr-empty-room {
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.dr-empty-room > span {
+  display: block;
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.dr-empty-room p {
+  color: var(--text-muted);
+}
+
+/* ---------- Toast: floats above the bottom nav, takes no space when empty ---------- */
+
+.dr-toast-region {
+  position: fixed;
+  left: 50%;
+  bottom: calc(112px + env(safe-area-inset-bottom));
+  z-index: 50;
+  width: min(100% - 32px, 420px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.dr-toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--plum);
+  border-radius: 12px;
+  box-shadow: 4px 4px 0 #c58ca8;
+  color: var(--cream);
+  font-size: 0.9rem;
+  pointer-events: auto;
+  animation: dr-toast-in 0.2s ease-out;
+}
+
+.dr-toast-error {
+  background: #a33152;
+  box-shadow: 4px 4px 0 #e3a9b8;
+}
+
+.dr-toast button {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  background: var(--cream);
+  border: 0;
+  border-radius: 8px;
+  color: var(--plum);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@keyframes dr-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dr-toast {
+    animation: none;
+  }
+}
+
+/* ---------- Phones: Ask Darling first, then a compact doll ---------- */
+
+@media (max-width: 760px) {
+  .dr-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'ask'
+      'doll';
+    gap: 18px;
+    padding: 14px;
+  }
+
+  .dr-ask {
+    position: static;
+  }
+
+  .dr-piece-frame {
+    height: 118px;
+  }
+
+  .dr-slot-dress .dr-piece-frame {
+    height: 210px;
+  }
+
+  .dr-slot-shoes .dr-piece-frame {
+    height: 78px;
+  }
+
+  .dr-slot {
+    grid-template-columns: 36px minmax(0, 1fr) 36px;
+  }
+
+  .dr-arrow {
+    width: 34px;
+    height: 34px;
+  }
+
+  .dr-toast-region {
+    bottom: calc(92px + env(safe-area-inset-bottom));
+  }
+}

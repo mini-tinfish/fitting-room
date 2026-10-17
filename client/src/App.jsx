@@ -1,8 +1,19 @@
 
 import MyCloset from './pages/MyCloset'
 import StyleMe from './pages/StyleMe'
+import MyWeek from './pages/MyWeek'
 import { useEffect, useState } from 'react'
-import { getCloset } from './closetStore'
+import {
+  addPlan,
+  getCloset,
+  getLooks,
+  getPlans,
+  removeLook,
+  removePlan,
+  saveLook,
+  updatePlan,
+} from './closetStore'
+import { normalizeOutfit } from './outfit'
 import './App.css'
 import fittingRoomTitle from './assets/branding/fitting-room-title.png'
 import lookbookLabel from './assets/navigation/lookbook.png'
@@ -22,18 +33,28 @@ const tabs = [
   { id: 'saved', label: 'Lookbook', icon: '♡', image: lookbookLabel, iconImage: lookbookIcon },
 ]
 
+const emptyDraft = { mode: 'separates', picks: {}, accessories: [], editingPlan: null, planDate: null }
 
 function App() {
   const [activeTab, setActiveTab] = useState('closet')
   const [closet, setCloset] = useState([])
+  // Lookbook favorites and My Week plans live here too, so every page sees changes immediately.
+  const [looks, setLooks] = useState([])
+  const [plans, setPlans] = useState([])
   const [closetLoading, setClosetLoading] = useState(true)
   const [closetError, setClosetError] = useState('')
+  // The outfit on Style Me's dressing room. Kept here so it survives switching tabs,
+  // and so My Week / Lookbook can open an outfit in Style Me.
+  const [styleDraft, setStyleDraft] = useState(emptyDraft)
 
-  // Read saved clothes from IndexedDB. This only reads, so it never overwrites stored data.
+  // Read saved clothes, looks and plans from IndexedDB. This only reads, so it never overwrites stored data.
   function fetchCloset(isCancelled = () => false) {
-    getCloset()
-      .then((items) => {
-        if (!isCancelled()) setCloset(items)
+    Promise.all([getCloset(), getLooks(), getPlans()])
+      .then(([items, savedLooks, savedPlans]) => {
+        if (isCancelled()) return
+        setCloset(items)
+        setLooks(savedLooks)
+        setPlans(savedPlans)
       })
       .catch(() => {
         if (!isCancelled()) setClosetError('Could not load your saved clothes.')
@@ -55,6 +76,74 @@ function App() {
     setClosetLoading(true)
     setClosetError('')
     fetchCloset()
+  }
+
+  // Each change is written to IndexedDB first, then shown, so the screen never shows unsaved data.
+  async function handleSaveLook(look) {
+    const saved = await saveLook(look)
+    setLooks((previous) => [...previous, saved])
+    return saved
+  }
+
+  async function handleRemoveLook(id) {
+    await removeLook(id)
+    setLooks((previous) => previous.filter((look) => look.id !== id))
+  }
+
+  async function handleAddPlan(plan) {
+    const saved = await addPlan(plan)
+    setPlans((previous) => [...previous, saved])
+    return saved
+  }
+
+  async function handleUpdatePlan(id, changes) {
+    const updated = await updatePlan(id, changes)
+    if (updated) setPlans((previous) => previous.map((plan) => (plan.id === id ? updated : plan)))
+    return updated
+  }
+
+  async function handleRemovePlan(id) {
+    await removePlan(id)
+    setPlans((previous) => previous.filter((plan) => plan.id !== id))
+    setStyleDraft((previous) => (previous.editingPlan?.id === id ? { ...previous, editingPlan: null } : previous))
+  }
+
+  // Put an outfit on the Style Me dressing room and switch to it.
+  function openInStyleMe({ outfit, editingPlan = null, planDate = null }) {
+    setStyleDraft((previous) => {
+      if (!outfit) return { ...previous, editingPlan, planDate }
+      const normalized = normalizeOutfit(outfit)
+      return {
+        mode: normalized.type,
+        picks: { ...previous.picks, top: normalized.top, bottom: normalized.bottom, dress: normalized.dress, shoes: normalized.shoes },
+        accessories: normalized.accessories,
+        editingPlan,
+        planDate,
+      }
+    })
+    setActiveTab('style')
+  }
+
+  // Same gate on every page: wait for saved data so new saves can't race the initial load.
+  function whenLoaded(content) {
+    if (closetLoading) {
+      return (
+        <div className="placeholder-card">
+          <p>Opening your wardrobe…</p>
+        </div>
+      )
+    }
+    if (closetError) {
+      return (
+        <div className="placeholder-card" role="alert">
+          <p>{closetError}</p>
+          <button type="button" onClick={retryLoadCloset}>
+            Try again
+          </button>
+        </div>
+      )
+    }
+    return content
   }
 
   return (
@@ -95,21 +184,7 @@ function App() {
 </h2>
             <p>All your favorite pieces, in one little place.</p>
 
-            {/* Wait for the saved closet so new items can't race the initial load. */}
-            {closetLoading ? (
-              <div className="placeholder-card">
-                <p>Opening your wardrobe…</p>
-              </div>
-            ) : closetError ? (
-              <div className="placeholder-card" role="alert">
-                <p>{closetError}</p>
-                <button type="button" onClick={retryLoadCloset}>
-                  Try again
-                </button>
-              </div>
-            ) : (
-              <MyCloset clothes={closet} setClothes={setCloset} />
-            )}
+            {whenLoaded(<MyCloset clothes={closet} setClothes={setCloset} />)}
           </section>
         )}
 
@@ -123,22 +198,19 @@ function App() {
     className="page-title-image"
   />
 </h2>
-            <p>Pick a vibe and the weather, or flip through your pieces.</p>
+            <p>Ask Darling for a look, pick a vibe, or flip through your pieces.</p>
 
-            {/* Same gate as My Closet: wait until saved clothes are loaded. */}
-            {closetLoading ? (
-              <div className="placeholder-card">
-                <p>Opening your wardrobe…</p>
-              </div>
-            ) : closetError ? (
-              <div className="placeholder-card" role="alert">
-                <p>{closetError}</p>
-                <button type="button" onClick={retryLoadCloset}>
-                  Try again
-                </button>
-              </div>
-            ) : (
-              <StyleMe closet={closet} />
+            {whenLoaded(
+              <StyleMe
+                closet={closet}
+                looks={looks}
+                draft={styleDraft}
+                setDraft={setStyleDraft}
+                onSaveLook={handleSaveLook}
+                onAddPlan={handleAddPlan}
+                onUpdatePlan={handleUpdatePlan}
+                onGoTo={setActiveTab}
+              />
             )}
           </section>
         )}
@@ -155,13 +227,17 @@ function App() {
 </h2>
             <p>Keep the outfits you love.</p>
 
-            <div className="placeholder-card">
-              <span className="placeholder-icon">♡</span>
-              <h3>No saved looks yet</h3>
-              <p>Your favorite combinations will appear here.</p>
-              {/* TODO: Connect saved outfits */}
-            </div>
-                <LookbookGrid />
+            {/* The Lookbook shows its own empty state only when nothing is saved. */}
+            {whenLoaded(
+              <LookbookGrid
+                closet={closet}
+                looks={looks}
+                onRemoveLook={handleRemoveLook}
+                onAddPlan={handleAddPlan}
+                onRestyle={(outfit) => openInStyleMe({ outfit })}
+                onGoTo={setActiveTab}
+              />
+            )}
           </section>
         )}
 
@@ -178,34 +254,18 @@ function App() {
 </h2>
     <p>Seven days, seven looks. Plan what to wear!</p>
 
-    <div className="week-grid">
-      {Array.from({ length: 7 }, (_, index) => {
-        const date = new Date()
-        date.setDate(date.getDate() + index)
-
-        return (
-          <div className="day-card" key={index}>
-            <span>
-              {date.toLocaleDateString('en-US', {
-                weekday: 'short',
-              })}
-            </span>
-            <strong>{date.getDate()}</strong>
-            <span>👗</span>
-          </div>
-        )
-      })}
-    </div>
-
-    <div className="placeholder-card">
-      <span className="placeholder-icon">📅</span>
-      <h3>Your weekly fits await!</h3>
-      <p>
-        Soon you'll be able to assign outfits to each
-        day and plan around the weather.
-      </p>
-      {/* TODO: Add outfit scheduling, weather, and Gemini. */}
-    </div>
+    {whenLoaded(
+      <MyWeek
+        closet={closet}
+        looks={looks}
+        plans={plans}
+        onAddPlan={handleAddPlan}
+        onUpdatePlan={handleUpdatePlan}
+        onRemovePlan={handleRemovePlan}
+        onEditOutfit={(plan) => openInStyleMe({ outfit: plan.outfit, editingPlan: plan })}
+        onBuildForDate={(date) => openInStyleMe({ planDate: date })}
+      />
+    )}
   </section>
 )}
 

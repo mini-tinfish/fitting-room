@@ -1,15 +1,39 @@
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import './MyCloset.css'
 import { addItem, removeItem } from '../closetStore'
+import { removeBackground } from '../api/removeBackground'
 
 const categories = [
   { value: 'all', label: 'All' },
   { value: 'top', label: 'Tops' },
   { value: 'bottom', label: 'Bottoms' },
+  { value: 'dress', label: 'Dresses' },
   { value: 'shoes', label: 'Shoes' },
   { value: 'accessory', label: 'Accessories' },
 ]
+
+const emptyItem = {
+  name: '',
+  category: 'top',
+  color: '',
+  warmth: 'medium',
+  tags: '',
+  image: '',
+  backgroundRemoved: false,
+}
+
+// status: 'idle' | 'processing' | 'done' | 'failed' | 'original' (user chose to keep the original)
+const emptyPhoto = { file: null, original: '', status: 'idle', error: '', retryable: false }
+
+function readFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
 
 export default function MyCloset({ clothes, setClothes }) {
   const [search, setSearch] = useState('')
@@ -21,14 +45,10 @@ const [saving, setSaving] = useState(false)
 const [removingId, setRemovingId] = useState(null)
 const [closetError, setClosetError] = useState('')
 
-const [newItem, setNewItem] = useState({
-  name: '',
-  category: 'top',
-  color: '',
-  warmth: 'medium',
-  tags: '',
-  image: '',
-})
+const [newItem, setNewItem] = useState(emptyItem)
+const [photo, setPhoto] = useState(emptyPhoto)
+// Bumped for every new attempt so a slow, older result can't replace a newer photo.
+const photoRequest = useRef(0)
 
 const filteredClothes = clothes.filter((item) => {
   const matchesCategory =
@@ -44,14 +64,46 @@ const filteredClothes = clothes.filter((item) => {
     (item.category === 'shoes' && query === 'shoe') ||
     (item.category === 'top' && query === 'tops') ||
     (item.category === 'bottom' && query === 'bottoms') ||
+    (item.category === 'dress' && query === 'dresses') ||
     (item.category === 'accessory' && query === 'accessories') ||
     (item.tags || []).some((tag) => tag.toLowerCase().includes(query))
 
   return matchesCategory && matchesSearch
 })
 
-function handlePhotoUpload(event) {
+async function runBackgroundRemoval(file) {
+  const request = ++photoRequest.current
+
+  // Nothing can be saved until the user has a processed image or picks the original.
+  setNewItem((previous) => ({ ...previous, image: '', backgroundRemoved: false }))
+  setPhoto((previous) => ({ ...previous, status: 'processing', error: '' }))
+
+  try {
+    const image = await removeBackground(file)
+    if (request !== photoRequest.current) return
+    setNewItem((previous) => ({ ...previous, image, backgroundRemoved: true }))
+    setPhoto((previous) => ({ ...previous, status: 'done' }))
+  } catch (error) {
+    if (request !== photoRequest.current) return
+    setPhoto((previous) => ({
+      ...previous,
+      status: 'failed',
+      error: error.message,
+      retryable: error.retryable !== false,
+    }))
+  }
+}
+
+function keepOriginalPhoto() {
+  photoRequest.current++
+  setNewItem((previous) => ({ ...previous, image: photo.original, backgroundRemoved: false }))
+  setPhoto((previous) => ({ ...previous, status: 'original' }))
+}
+
+async function handlePhotoUpload(event) {
   const file = event.target.files?.[0]
+  // Clear the input so choosing the same photo again still starts a new attempt.
+  event.target.value = ''
   if (!file) return
 
   if (!file.type.startsWith('image/')) {
@@ -66,20 +118,16 @@ function handlePhotoUpload(event) {
 
   setUploadError('')
 
-  const reader = new FileReader()
-
-  reader.onload = () => {
-    setNewItem((previous) => ({
-      ...previous,
-      image: String(reader.result),
-    }))
-  }
-
-  reader.onerror = () => {
+  let original
+  try {
+    original = await readFile(file)
+  } catch {
     setUploadError('Could not read this image.')
+    return
   }
 
-  reader.readAsDataURL(file)
+  setPhoto({ ...emptyPhoto, file, original })
+  runBackgroundRemoval(file)
 }
 
 async function handleSaveClothing(event) {
@@ -87,6 +135,16 @@ async function handleSaveClothing(event) {
 
   // Ignore extra clicks while the first save is still running.
   if (saving) return
+
+  if (photo.status === 'processing') {
+    setUploadError('Please wait for the background to finish removing.')
+    return
+  }
+
+  if (photo.status === 'failed') {
+    setUploadError('Choose Try Again or Keep Original Photo before saving.')
+    return
+  }
 
   if (!newItem.name.trim() || !newItem.image) {
     setUploadError('Please add a name and clothing photo.')
@@ -104,6 +162,8 @@ async function handleSaveClothing(event) {
       .map((tag) => tag.trim().toLowerCase())
       .filter(Boolean),
     image: newItem.image,
+    // false = the user chose to keep the original photo. Older items don't have this field.
+    backgroundRemoved: newItem.backgroundRemoved,
   }
 
   setSaving(true)
@@ -126,14 +186,8 @@ async function handleSaveClothing(event) {
   setShowUpload(false)
   setUploadError('')
 
-  setNewItem({
-    name: '',
-    category: 'top',
-    color: '',
-    warmth: 'medium',
-    tags: '',
-    image: '',
-  })
+  setNewItem(emptyItem)
+  setPhoto(emptyPhoto)
 }
 
 async function handleRemove(id) {
@@ -274,14 +328,28 @@ async function handleRemove(id) {
         className="closet-upload-form"
         onSubmit={handleSaveClothing}
       >
-        <label className="closet-photo-upload">
-          {newItem.image ? (
+        <label
+          className="closet-photo-upload"
+          aria-busy={photo.status === 'processing'}
+        >
+          {photo.status === 'done' ? (
             <img
+              className="closet-photo-transparent"
               src={newItem.image}
-              alt="Clothing preview"
+              alt="Clothing preview with the background removed"
+            />
+          ) : photo.original ? (
+            <img
+              className={photo.status === 'processing' ? 'closet-photo-processing' : ''}
+              src={photo.original}
+              alt="Original clothing photo"
             />
           ) : (
             <span>📷 Choose a clothing photo</span>
+          )}
+
+          {photo.original && (
+            <span className="closet-field-hint">Tap to choose a different photo</span>
           )}
 
           <input
@@ -290,6 +358,64 @@ async function handleRemove(id) {
             onChange={handlePhotoUpload}
           />
         </label>
+
+        {photo.status === 'processing' && (
+          <p className="closet-bg-status" role="status">
+            <span className="closet-bg-spinner" aria-hidden="true" />
+            Removing background...
+          </p>
+        )}
+
+        {photo.status === 'done' && (
+          <p className="closet-bg-status" role="status">
+            ✓ Background removed! Check the preview, then save.
+          </p>
+        )}
+
+        {photo.status === 'failed' && (
+          <div className="closet-bg-panel">
+            <p className="closet-upload-error" role="alert">
+              {photo.error} Your photo hasn't been saved yet.
+            </p>
+            <div className="closet-bg-actions">
+              {photo.retryable && (
+                <button
+                  className="closet-bg-btn"
+                  type="button"
+                  onClick={() => runBackgroundRemoval(photo.file)}
+                >
+                  Try Again
+                </button>
+              )}
+              <button
+                className="closet-bg-btn"
+                type="button"
+                onClick={keepOriginalPhoto}
+              >
+                Keep Original Photo
+              </button>
+            </div>
+          </div>
+        )}
+
+        {photo.status === 'original' && (
+          <div className="closet-bg-panel">
+            <p className="closet-bg-status" role="status">
+              Keeping the original photo. The background was not removed.
+            </p>
+            {photo.retryable && (
+              <div className="closet-bg-actions">
+                <button
+                  className="closet-bg-btn"
+                  type="button"
+                  onClick={() => runBackgroundRemoval(photo.file)}
+                >
+                  Try Removing Again
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         <label>
           Clothing name
@@ -320,6 +446,7 @@ async function handleRemove(id) {
             >
               <option value="top">Tops</option>
               <option value="bottom">Bottoms</option>
+              <option value="dress">Dresses</option>
               <option value="shoes">Shoes</option>
               <option value="accessory">Accessories</option>
             </select>
@@ -361,6 +488,7 @@ async function handleRemove(id) {
           Aesthetic tags
           <input
             placeholder="coquette, casual, y2k"
+            aria-describedby="closet-tags-hint"
             value={newItem.tags}
             onChange={(e) =>
               setNewItem({
@@ -369,6 +497,9 @@ async function handleRemove(id) {
               })
             }
           />
+          <span id="closet-tags-hint" className="closet-field-hint">
+            Style Me matches these: 90s rom-com, clean girl, y2k, dark academia, streetwear.
+          </span>
         </label>
 
         {uploadError && (
@@ -380,9 +511,13 @@ async function handleRemove(id) {
         <button
           className="closet-save-btn"
           type="submit"
-          disabled={saving}
+          disabled={saving || photo.status === 'processing' || photo.status === 'failed'}
         >
-          {saving ? 'Saving…' : '♡ Save to Closet'}
+          {photo.status === 'processing'
+            ? 'Removing background…'
+            : saving
+              ? 'Saving…'
+              : '♡ Save to Closet'}
         </button>
       </form>
     </div>

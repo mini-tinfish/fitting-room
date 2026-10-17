@@ -1,0 +1,133 @@
+/* Lookbook: saved outfits as little paper-doll cards. */
+
+.lookbook-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.lookbook-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  background: #fff;
+  border: 1px solid #ead4df;
+  border-radius: 14px;
+  box-shadow: 3px 3px 0 #efd9e4;
+  color: var(--plum);
+  text-align: center;
+  cursor: pointer;
+}
+
+.lookbook-card:hover {
+  border-color: #dcb2c8;
+}
+
+.lookbook-card img {
+  display: block;
+  max-width: 100%;
+  height: 80px;
+  object-fit: contain;
+}
+
+.lookbook-card img.lookbook-card-accessory {
+  height: 36px;
+}
+
+.lookbook-card span {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.lookbook-card small {
+  color: var(--text-muted);
+}
+
+.lookbook-detail {
+  margin-top: 20px;
+}
+
+.lookbook-detail h3 {
+  margin: 16px 0 4px;
+}
+
+.lookbook-muted {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.lookbook-darling {
+  margin: 12px 0 16px;
+  padding: 10px 14px;
+  background: #fdf0f6;
+  border-left: 3px solid #e9bfd4;
+  border-radius: 0 10px 10px 0;
+  font-size: 0.85rem;
+}
+
+.lookbook-darling p {
+  margin: 0;
+}
+
+.lookbook-darling p + p {
+  margin-top: 6px;
+  color: var(--text-muted);
+}
+
+.lookbook-piece {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+}
+
+.lookbook-piece-image {
+  flex-shrink: 0;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 2px dashed #e8bfd2;
+  border-radius: 12px;
+}
+
+.lookbook-piece-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.lookbook-piece-image span {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.lookbook-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.lookbook-message {
+  color: var(--plum);
+  font-weight: 700;
+}
+
+@media (max-width: 480px) {
+  .lookbook-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .lookbook-piece-image {
+    width: 100px;
+    height: 100px;
+  }
+}

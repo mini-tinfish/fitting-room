@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from 'react'
+import { CloseIcon } from './WindowControls'
 import './RetroModal.css'
 
 // Pop-up window in the same style as the Add Clothing window.
@@ -45,7 +46,7 @@ export default function RetroModal({ title, onClose, children, wide = false }) {
         <div className="od-modal-header">
           <strong id={titleId}>{title}</strong>
           <button type="button" aria-label="Close" onClick={onClose}>
-            ×
+            <CloseIcon />
           </button>
         </div>
         <div className="od-modal-body">{children}</div>

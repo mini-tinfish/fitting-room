@@ -6,6 +6,7 @@ import { SLOT_LABELS, normalizeOutfit, outfitPieces } from '../outfit'
 import { daysBetween, formatDate, relativeDayLabel, toDateKey, upcomingDays } from '../dates'
 import plusButtonImage from '../assets/buttons/outfit_weekday_plus.png'
 import pushPinImage from '../assets/buttons/push_pin_weekly.png'
+import planNoteImage from '../assets/buttons/plan.png'
 import './MyWeek.css'
 
 // My Week shows today plus the next six days, rolling forward every day.
@@ -157,8 +158,13 @@ export default function MyWeek({ closet, looks, plans, onAddPlan, onUpdatePlan, 
                     <span> · {formatDate(day, { weekday: 'long', month: 'short', day: 'numeric' })}</span>
                   )}
                 </h3>
-                <button type="button" className="od-chip" onClick={() => setDialog({ kind: 'choose', date: day })}>
-                  + Plan
+                <button
+                  type="button"
+                  className="week-plan-btn"
+                  onClick={() => setDialog({ kind: 'choose', date: day })}
+                  aria-label="Plan an outfit"
+                >
+                  <img src={planNoteImage} alt="" />
                 </button>
               </header>
 

@@ -4,6 +4,7 @@
 .my-week .day-card {
   position: relative;
   font: inherit;
+  font-family: var(--font-mono);
 }
 
 .my-week .day-card.is-today {
@@ -81,6 +82,7 @@
   background: #e9bfd4;
   border-radius: 999px;
   color: #493349;
+  font-family: var(--font-mono);
   font-size: 0.6rem;
   font-weight: 700;
 }
@@ -122,28 +124,88 @@
   margin-bottom: 8px;
 }
 
-/* Keep "+ Plan" on one line; the long "Today · Saturday, Oct 17" heading wraps instead. */
-.week-day-header .od-chip {
+/* Procreate "+ Plan" sticky note, shown as drawn (512x279, tape included).
+   The heading wraps instead of squeezing it. Negative top/bottom margins let the note overhang
+   into the spacing around the header, so its full artwork and tap area show without making
+   each of the seven day headers much taller. It sits at the right, clear of the centred pushpins. */
+.week-plan-btn {
+  display: block;
   flex-shrink: 0;
-  white-space: nowrap;
+  margin-block: -15px;
+  padding: 0;
+  appearance: none;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  cursor: pointer;
 }
 
+.week-plan-btn img {
+  display: block;
+  width: 128px;
+  height: auto;
+  object-fit: contain;
+  transition: transform 0.15s ease;
+}
+
+.week-plan-btn:hover img {
+  transform: translateY(-1px);
+}
+
+.week-plan-btn:active img {
+  transform: translateY(2px);
+}
+
+.week-plan-btn:focus-visible {
+  outline: 2px solid #c58ca8;
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .week-plan-btn {
+    margin-block: -11px;
+  }
+
+  .week-plan-btn img {
+    width: 100px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .week-plan-btn img {
+    transition: none;
+  }
+
+  .week-plan-btn:hover img,
+  .week-plan-btn:active img {
+    transform: none;
+  }
+}
+
+/* "Today" in the editorial serif; the date beside it in the monospace calendar style. */
 .week-day-header h3 {
   margin: 0;
-  font-size: 0.95rem;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 400;
+  line-height: 1.2;
   color: var(--plum);
 }
 
 .week-day-header h3 span {
   color: var(--text-muted);
+  font-family: var(--font-mono);
   font-weight: 400;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
 }
 
 .week-day-empty {
   margin: 0;
   color: #8a6f6a;
-  font-size: 0.8rem;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.95rem;
 }
 
 /* The pushpins stick up above each card, so leave room above the first row and between rows
@@ -188,14 +250,18 @@
 
 .plan-date {
   color: #a06b87;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
 .plan-title {
-  font-size: 0.95rem;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 400;
+  line-height: 1.2;
 }
 
 .plan-preview {
@@ -244,7 +310,8 @@
 }
 
 .week-later summary {
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
   cursor: pointer;
 }
 

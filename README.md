@@ -4,7 +4,7 @@
 
 *Your closet, your rules, darling.*
 
-**[outfit-darling.us](https://outfit-darling.us)**
+**[Visit Our App!](https://outfit-darling-web-production.up.railway.app/)**
 
 <sub>✧ a digital wardrobe ✧ a paper-doll dressing room ✧ a stylist on call ✧</sub>
 

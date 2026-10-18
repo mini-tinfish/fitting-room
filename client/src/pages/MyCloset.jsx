@@ -3,8 +3,10 @@ import { useRef, useState } from 'react'
 import './MyCloset.css'
 import { addItem, removeItem } from '../closetStore'
 import { removeBackground } from '../api/removeBackground'
+import { CloseIcon, WindowControls } from '../components/WindowControls'
 import removeButtonImage from '../assets/buttons/remove-button.png'
 import uploadButtonImage from '../assets/buttons/upload_button.png'
+import addClothingButtonImage from '../assets/buttons/add_clothing_button.png'
 
 const categories = [
   { value: 'all', label: 'All' },
@@ -217,7 +219,7 @@ async function handleRemove(id) {
     <div className="closet-window">
       <div className="closet-window-bar">
         <span>♡ MY WARDROBE ♡</span>
-        <span aria-hidden="true">□ ×</span>
+        <WindowControls />
       </div>
 
       <div className="closet-window-content">
@@ -228,8 +230,13 @@ async function handleRemove(id) {
   className="closet-add-btn"
   type="button"
   onClick={() => setShowUpload(true)}
+  aria-label="Add Clothing"
 >
-  + Add Clothing
+  <img
+    className="closet-add-btn-image"
+    src={addClothingButtonImage}
+    alt=""
+  />
 </button>
 
         </div>
@@ -331,7 +338,7 @@ async function handleRemove(id) {
           aria-label="Close upload window"
           onClick={() => setShowUpload(false)}
         >
-          ×
+          <CloseIcon />
         </button>
       </div>
 

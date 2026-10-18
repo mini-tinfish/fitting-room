@@ -44,6 +44,17 @@
   letter-spacing: 0.5px;
 }
 
+/* Pop-up titles in the editorial serif; it's narrower than the monospace, so long titles
+   like "♡ Planned for Saturday, Oct 17" still fit the bar on small phones. */
+.od-modal-header strong {
+  min-width: 0;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
 /* 44px tap target; the negative margins keep the header bar its original height. */
 .od-modal-header button {
   display: flex;
@@ -78,8 +89,9 @@
   flex-direction: column;
   gap: 7px;
   color: #593a50;
+  font-family: var(--font-mono);
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .od-field input,
@@ -101,6 +113,7 @@
 
 .od-field-hint {
   color: var(--text-muted);
+  font-family: var(--font-body);
   font-size: 0.75rem;
   font-weight: 400;
 }
@@ -117,6 +130,7 @@
   border-radius: 20px;
   background: #fff1f7;
   color: #65455a;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
   cursor: pointer;
 }
@@ -133,6 +147,8 @@
   padding: 12px 16px;
   border-radius: 10px;
   color: var(--plum);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
 }

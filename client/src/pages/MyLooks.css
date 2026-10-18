@@ -39,12 +39,16 @@
 
 .lookbook-card span {
   margin-top: 6px;
-  font-size: 0.85rem;
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.2;
 }
 
 .lookbook-card small {
   color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
 }
 
 .lookbook-detail {
@@ -53,11 +57,17 @@
 
 .lookbook-detail h3 {
   margin: 16px 0 4px;
+  font-family: var(--font-serif);
+  font-size: 1.7rem;
+  font-weight: 400;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .lookbook-muted {
   color: var(--text-muted);
-  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
 }
 
 .lookbook-darling {
@@ -71,6 +81,14 @@
 
 .lookbook-darling p {
   margin: 0;
+}
+
+/* The request is quoted like a pull quote; Darling's explanation stays in the body font. */
+.lookbook-darling p:first-child {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.05rem;
+  line-height: 1.3;
 }
 
 .lookbook-darling p + p {
@@ -134,7 +152,6 @@
 /* =========================================================
    Journal book Lookbook (polaroids + washi tape)
    ========================================================= */
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap');
 
 /* ---------- The book ---------- */
 .jb-book {
@@ -189,8 +206,9 @@
 .jb-page-number {
   position: absolute;
   bottom: 14px;
-  font-family: 'Caveat', cursive;
-  font-size: 1.1rem;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1rem;
   color: #a08b78;
 }
 .jb-left .jb-page-number { left: 22px; }
@@ -244,16 +262,18 @@
 
 .jb-caption {
   margin-top: 10px;
-  font-family: 'Caveat', cursive;
-  font-size: 1.35rem;
-  font-weight: 700;
-  line-height: 1.1;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  font-weight: 400;
+  line-height: 1.15;
   color: #4b3a33;
   text-align: center;
 }
 .jb-date {
-  font-family: 'Caveat', cursive;
-  font-size: 1rem;
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
   color: #a08b78;
   text-align: center;
 }
@@ -294,16 +314,16 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 20px;
-  font-family: 'Caveat', cursive;
-  font-size: 1.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
   color: #6b5446;
 }
 .jb-nav button {
   padding: 4px 8px;
   background: none;
   border: none;
-  font-family: 'Caveat', cursive;
-  font-size: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
   color: #c76b8c;
   cursor: pointer;
 }
@@ -326,7 +346,7 @@
 /* Keep caption text inside the polaroid */
 .jb-caption {
   max-width: 100%;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   overflow-wrap: anywhere;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -334,6 +354,6 @@
   overflow: hidden;
 }
 .jb-date {
-  font-size: 0.9rem;
+  font-size: 0.68rem;
   white-space: nowrap;
 }

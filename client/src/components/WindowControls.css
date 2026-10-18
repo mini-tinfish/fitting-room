@@ -1,0 +1,21 @@
+/* Custom Procreate expand / exit icons for the retro window title bars, shown as drawn. */
+.window-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* 18px matches the title bars' text height, so the bars don't get taller. */
+.window-icon {
+  display: block;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* Inside a popup's close button (a 44px tap target), slightly larger. */
+.window-icon-close {
+  width: 20px;
+  height: 20px;
+}

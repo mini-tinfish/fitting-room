@@ -2,12 +2,16 @@ import { useEffect, useRef, useState } from 'react';
 import { API_URL } from '../api/config';
 import { askDarling } from '../api/stylist';
 import PlanOutfitModal from '../components/PlanOutfitModal';
+import { WindowControls } from '../components/WindowControls';
 import { OUTFIT_MODES, SLOT_LABELS, isOutfitEmpty, normalizeOutfit, outfitPieces, outfitSignature } from '../outfit';
 import { addDays, daysBetween, formatDate, relativeDayLabel, toDateKey } from '../dates';
 import './StyleMe.css';
 import arrowLeftImage from '../assets/buttons/button_point_left.png';
 import arrowRightImage from '../assets/buttons/button_point_right.png';
 import styleMeButtonImage from '../assets/buttons/style_me_button.png';
+import planOutfitButtonImage from '../assets/buttons/plan_outfit_button.png';
+import saveThisLookButtonImage from '../assets/buttons/save_this_look.png';
+import askDarlingButtonImage from '../assets/buttons/ask_darling_button.png';
 
 const EMPTY_LABELS = { top: 'No tops yet', bottom: 'No bottoms yet', dress: 'No dresses yet', shoes: 'No shoes yet' };
 const EXAMPLE_REQUESTS = [
@@ -286,7 +290,7 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
       <div className="dressing-room">
         <div className="dr-window-bar">
           <span>♡ darling&apos;s dressing room ♡</span>
-          <span aria-hidden="true">□ ×</span>
+          <WindowControls />
         </div>
         <div className="dr-empty-room">
           <span aria-hidden="true">👗</span>
@@ -304,7 +308,7 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
     <div className="dressing-room">
       <div className="dr-window-bar">
         <span>♡ darling&apos;s dressing room ♡</span>
-        <span aria-hidden="true">□ ×</span>
+        <WindowControls />
       </div>
 
       {draft.editingPlan && (
@@ -394,8 +398,14 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
                 </p>
               )}
 
-              <button type="submit" className="dr-ask-btn" disabled={asking}>
-                {asking ? 'Darling is thinking…' : '♡ Ask Darling'}
+              <button
+                type="submit"
+                className="dr-art-btn dr-ask-btn"
+                disabled={asking}
+                aria-busy={asking}
+                aria-label="Ask Darling"
+              >
+                <img src={askDarlingButtonImage} alt="" />
               </button>
             </form>
           </section>
@@ -480,7 +490,7 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
 
           <button
             type="button"
-            className="dr-style-btn"
+            className="dr-art-btn dr-style-btn"
             onClick={styleMe}
             disabled={styling}
             aria-busy={styling}
@@ -506,20 +516,39 @@ export default function StyleMe({ closet, looks, draft, setDraft, onSaveLook, on
           <div className="dr-actions">
             <button
               type="button"
-              className="od-secondary-btn"
+              className="dr-art-btn dr-save-btn"
               onClick={handleSaveLook}
               disabled={saving || outfitEmpty || alreadySaved}
+              aria-busy={saving}
+              // The artwork always reads "Save This Look", so the label carries the state;
+              // the fade (disabled) and the "Saved to your Lookbook!" toast show it on screen.
+              aria-label={saving ? 'Saving…' : alreadySaved ? 'Saved to your Lookbook' : 'Save This Look'}
+              title={alreadySaved ? 'Already saved to your Lookbook' : undefined}
             >
-              {saving ? 'Saving…' : alreadySaved ? '💖 Saved!' : '♡ Save This Look'}
+              <img src={saveThisLookButtonImage} alt="" />
             </button>
-            <button
-              type="button"
-              className="od-secondary-btn"
-              onClick={() => setShowPlanModal(true)}
-              disabled={outfitEmpty}
-            >
-              {planButtonLabel}
-            </button>
+            {/* One button either way. The artwork reads "Plan This Outfit", so while editing a
+                planned outfit from My Week it keeps its "Update This Plan" text instead. */}
+            {draft.editingPlan ? (
+              <button
+                type="button"
+                className="od-secondary-btn"
+                onClick={() => setShowPlanModal(true)}
+                disabled={outfitEmpty}
+              >
+                {planButtonLabel}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="dr-art-btn dr-plan-btn"
+                onClick={() => setShowPlanModal(true)}
+                disabled={outfitEmpty}
+                aria-label="Plan This Outfit"
+              >
+                <img src={planOutfitButtonImage} alt="" />
+              </button>
+            )}
           </div>
           {outfitEmpty && <p className="dr-hint dr-center">Add a piece to save or plan this outfit.</p>}
         </section>

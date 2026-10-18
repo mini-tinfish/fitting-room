@@ -16,14 +16,15 @@
   background: #efc9dc;
   padding: 12px 16px;
   color: #593a50;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
   font-weight: bold;
   letter-spacing: 1px;
   white-space: nowrap;
 }
 
-/* Small phones: keep "♡ darling's dressing room ♡" on one line. The "□ ×" is only
-   window-bar decoration, so it steps aside on the narrowest screens. */
+/* Small phones: keep "♡ darling's dressing room ♡" on one line. The expand/exit icons are
+   only window-bar decoration, so they step aside on the narrowest screens. */
 @media (max-width: 400px) {
   .dr-window-bar {
     padding-inline: 12px;
@@ -33,7 +34,7 @@
 }
 
 @media (max-width: 360px) {
-  .dr-window-bar > span[aria-hidden='true'] {
+  .dr-window-bar > .window-controls {
     display: none;
   }
 }
@@ -69,8 +70,11 @@
 
 .dr-section-title {
   margin: 0 0 8px;
-  font-size: 0.95rem;
-  letter-spacing: 0.5px;
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.15;
   color: var(--plum);
 }
 
@@ -110,7 +114,8 @@
   border-radius: 999px;
   background: transparent;
   color: #65455a;
-  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
   cursor: pointer;
 }
 
@@ -159,9 +164,10 @@
   align-items: center;
   gap: 6px;
   color: #a06b87;
+  font-family: var(--font-mono);
   font-size: 0.62rem;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
   text-transform: uppercase;
 }
 
@@ -266,10 +272,10 @@
   cursor: default;
 }
 
-/* Custom Procreate "Style Me!" button: only the artwork shows.
-   The <button> itself is reset (otherwise the browser draws its own gray box) and
-   shrinks to fit the image. 192px is 1.5x the 128px source. */
-.dr-style-btn {
+/* ---------- Custom Procreate artwork buttons ----------
+   Style Me!, Save This Look and Plan This Outfit share one set of behaviours (.dr-art-btn).
+   The <button> is reset so only the artwork shows (otherwise the browser draws its own box). */
+.dr-art-btn {
   display: block;
   width: fit-content;
   max-width: 100%;
@@ -277,30 +283,54 @@
   appearance: none;
   background: none;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   box-shadow: none;
   cursor: pointer;
 }
 
-.dr-style-btn img {
+.dr-art-btn img {
   display: block;
-  width: 192px;
   max-width: 100%;
   height: auto;
-  object-fit: contain;
-  image-rendering: pixelated;
+  transition: transform 0.15s ease;
 }
 
-.dr-style-btn:active:not(:disabled) img {
-  transform: translate(2px, 2px);
+.dr-art-btn:hover:not(:disabled) img {
+  transform: translateY(-1px);
 }
 
-.dr-style-btn:focus-visible {
+.dr-art-btn:active:not(:disabled) img {
+  transform: translateY(2px);
+}
+
+.dr-art-btn:focus-visible {
   outline: 2px solid #c58ca8;
   outline-offset: 2px;
 }
 
-/* While styling: same artwork, just not clickable. */
+.dr-art-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dr-art-btn img {
+    transition: none;
+  }
+
+  .dr-art-btn:hover:not(:disabled) img,
+  .dr-art-btn:active:not(:disabled) img {
+    transform: none;
+  }
+}
+
+/* Style Me!: 128px pixel art shown at 1.5x, kept crisp. Busy cursor while an outfit is styled. */
+.dr-style-btn img {
+  width: 192px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
 .dr-style-btn:disabled {
   cursor: progress;
 }
@@ -308,8 +338,29 @@
 .dr-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
   gap: 10px;
+}
+
+/* Save This Look and Plan This Outfit: same-sized drawings (696x223) in 800px-wide PNGs with
+   transparent bands above and below. An 800:232 box with object-fit: cover leaves out only those
+   empty bands, at the same scale, so nothing drawn is cut. No pixelated: the art is scaled down ~4x. */
+.dr-save-btn img,
+.dr-plan-btn img {
+  width: 210px;
+  aspect-ratio: 800 / 232;
+  object-fit: cover;
+}
+
+/* 800x375 PNG, drawing in rows 68-290: centre that band. */
+.dr-save-btn img {
+  object-position: center 44.4%;
+}
+
+/* 800x355 PNG, drawing in rows 66-288: already centred. */
+.dr-plan-btn img {
+  object-position: center;
 }
 
 /* ---------- Ask Darling panel ---------- */
@@ -362,7 +413,8 @@
   border-radius: 10px;
   color: var(--plum);
   font: inherit;
-  font-size: 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
   resize: vertical;
 }
 
@@ -371,20 +423,29 @@
   font-size: 0.72rem;
 }
 
+/* Date + "Use forecast" stay on one row: the date input gives up width first. */
 .dr-forecast {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 6px;
 }
 
+.dr-forecast > .od-chip {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .dr-date-input {
+  flex: 0 1 auto;
+  min-width: 0;
   padding: 6px 8px;
   background: #fff;
   border: 1px solid #dec5d1;
   border-radius: 8px;
   color: var(--plum);
   font: inherit;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
 }
 
@@ -396,7 +457,8 @@
   background: #fff;
   border: 1px solid #e2c5d4;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
 }
 
 .dr-forecast-chip button {
@@ -408,19 +470,19 @@
   cursor: pointer;
 }
 
+/* Ask Darling: 800x366 PNG, drawing in rows 55-277. Same crop and size as Save/Plan. */
 .dr-ask-btn {
-  padding: 12px 16px;
-  background: var(--plum);
-  border: 2px solid var(--plum);
-  border-radius: 10px;
-  box-shadow: 3px 3px 0 #c58ca8;
-  color: var(--cream);
-  font-weight: 700;
-  cursor: pointer;
+  align-self: center;
+}
+
+.dr-ask-btn img {
+  width: 210px;
+  aspect-ratio: 800 / 232;
+  object-fit: cover;
+  object-position: center 37.3%;
 }
 
 .dr-ask-btn:disabled {
-  opacity: 0.7;
   cursor: progress;
 }
 
@@ -438,7 +500,8 @@
   padding: 10px 14px;
   background: #efc9dc;
   color: var(--plum);
-  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
   letter-spacing: 0.5px;
 }
 
@@ -471,7 +534,10 @@
 
 .dr-darling-title {
   color: var(--plum);
-  font-size: 0.95rem;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1.2;
 }
 
 .dr-heard {
@@ -485,7 +551,8 @@
   background: #f9e9f1;
   border-radius: 999px;
   color: #815974;
-  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
 }
 
 .dr-picked,
@@ -537,6 +604,13 @@
   margin-bottom: 12px;
 }
 
+.dr-empty-room h3 {
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
 .dr-empty-room p {
   color: var(--text-muted);
 }
@@ -580,6 +654,7 @@
   border: 0;
   border-radius: 8px;
   color: var(--plum);
+  font-family: var(--font-mono);
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;

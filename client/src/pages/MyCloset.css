@@ -200,7 +200,14 @@
   color: #493349;
 }
 
+/* 44px tap target; the negative margins keep the header bar its original height. */
 .closet-modal-header button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -10px -12px -10px 0;
   border: 0;
   background: transparent;
   color: #493349;
@@ -387,6 +394,11 @@
 @media (max-width: 480px) {
   .closet-upload-form {
     padding: 16px;
+  }
+
+  /* Stack Category and Fabric Weight so the fabric descriptions aren't cut off. */
+  .closet-form-row {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

@@ -24,7 +24,9 @@
   background-size: 360px auto;
   background-position: top left;
   color: var(--plum);
-  padding-bottom: 100px;
+  /* Room for the fixed bottom nav (with .app-main's own bottom padding), plus the
+     phone's home-indicator area, which the nav also grows by. */
+  padding-bottom: calc(92px + env(safe-area-inset-bottom));
 }
 
 
@@ -33,12 +35,38 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 28px 24px;
+  gap: 16px;
+  padding: 14px 24px;
   background: #fce4ee;
   border-bottom: 2px solid var(--border);
 }
 
+/* Flowers on both sides of the title. Same width on each side keeps the title centered;
+   they scale with the screen so the title always has room. The left one is mirrored. */
+.app-header-decor {
+  display: block;
+  flex: 0 0 auto;
+  width: clamp(120px, 22vw, 340px);
+  height: auto;
+}
+
+.app-header-decor-left {
+  transform: scaleX(-1);
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    padding-block: 10px;
+  }
+
+  .app-header-decor {
+    display: none;
+  }
+}
+
 .app-header-brand {
+  flex: 1 1 auto;
+  min-width: 0;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -47,7 +75,7 @@
 }
 
 .app-header-subtitle {
-  margin: 10px 0 0;
+  margin: 6px 0 0;
 }
 
 h1, h2, h3, p {
@@ -120,8 +148,8 @@ h1 {
   display: flex;
   justify-content: center;
   gap: 12px;
-  padding: 12px max(12px, env(safe-area-inset-right))
-    calc(12px + env(safe-area-inset-bottom))
+  padding: 8px max(12px, env(safe-area-inset-right))
+    calc(8px + env(safe-area-inset-bottom))
     max(12px, env(safe-area-inset-left));
   background: white;
   border-top: 2px solid var(--border);
@@ -154,8 +182,9 @@ h1 {
 }
 
 @media (min-width: 768px) {
+  /* Up to 1200px wide (the page content below stays 900px) so the header flowers have room. */
   .app-header {
-    padding-inline: max(32px, calc((100vw - 1000px) / 2));
+    padding-inline: max(24px, calc((100vw - 1200px) / 2));
   }
 
   .app-main {
@@ -225,12 +254,17 @@ h1 {
   justify-content: center;
 }
 
+/* The 600x160 PNG has transparent bands above and below the lettering (it fills rows 37-132).
+   A 600:100 box with object-fit: cover keeps the same scale but leaves out only those empty
+   bands (rows 34-134 are shown), so the header isn't padded by invisible pixels. */
 .title-image {
   display: block;
   width: 100%;
   max-width: 420px;
   height: auto;
-  object-fit: contain;
+  aspect-ratio: 600 / 100;
+  object-fit: cover;
+  object-position: center 56.7%;
 }
 
 @media (max-width: 480px) {
@@ -378,5 +412,53 @@ h1 {
   .page {
     padding: 20px 16px;
     border-radius: 18px;
+  }
+}
+
+/* ---------- Touch targets on phones ----------
+   The small chips keep their look, but get an invisible hit area stretched to 44px tall.
+   It sits behind the chips (z-index: -1 inside an isolated container), so where wrapped
+   rows are close together, a chip's visible body always wins over its neighbour's hit area. */
+@media (max-width: 768px) {
+  .od-chip-row,
+  .week-card-actions,
+  .week-day-header,
+  .dr-forecast,
+  .closet-categories,
+  .dr-mode-toggle,
+  .jb-nav,
+  .week-later {
+    isolation: isolate;
+  }
+
+  .od-chip,
+  .closet-filter,
+  .dr-mode-toggle button,
+  .jb-nav button,
+  .dr-forecast-chip button,
+  .week-later summary {
+    position: relative;
+  }
+
+  .od-chip::after,
+  .closet-filter::after,
+  .dr-mode-toggle button::after,
+  .jb-nav button::after,
+  .week-later summary::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 0;
+    right: 0;
+    top: min(0px, calc(50% - 22px));
+    bottom: min(0px, calc(50% - 22px));
+  }
+
+  /* The forecast chip's tiny × also grows sideways. */
+  .dr-forecast-chip button::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: min(0px, calc(50% - 22px));
   }
 }

@@ -4,7 +4,6 @@
 .my-week .day-card {
   position: relative;
   font: inherit;
-  cursor: pointer;
 }
 
 .my-week .day-card.is-today {
@@ -15,23 +14,73 @@
   background: #fff;
 }
 
-.day-card-thumb {
-  width: 34px;
-  height: 34px;
+/* Day name + date: scrolls to that day on the corkboard. Looks like plain card text. */
+.day-card-jump {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: inherit;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Days with nothing planned have no plus, so the day name and date fill the card and sit
+   in its middle instead of leaving a blank space below. (All cards share the row's height.) */
+.my-week .day-card:not(.has-plans) .day-card-jump {
+  flex: 1;
+  justify-content: center;
+}
+
+/* Procreate plus button, only on days with plans. The 44px tap target may spill a few
+   pixels into the gap between narrow phone cards, without reaching the next card. */
+.day-card-plus {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 -6px;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.day-card-plus img {
+  display: block;
+  width: 44px;
+  height: auto;
   object-fit: contain;
+  transition: transform 0.15s ease;
 }
 
-.day-card-empty {
-  opacity: 0.35;
+.day-card-plus:hover img {
+  transform: scale(1.08);
 }
 
+.day-card-jump:focus-visible,
+.day-card-plus:focus-visible {
+  outline: 2px solid #c58ca8;
+  outline-offset: 2px;
+}
+
+/* How many outfits are planned, when there's more than one. */
 .day-card-count {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: -2px;
+  right: -2px;
   padding: 1px 5px;
   background: #e9bfd4;
   border-radius: 999px;
+  color: #493349;
   font-size: 0.6rem;
   font-weight: 700;
 }
@@ -73,6 +122,12 @@
   margin-bottom: 8px;
 }
 
+/* Keep "+ Plan" on one line; the long "Today · Saturday, Oct 17" heading wraps instead. */
+.week-day-header .od-chip {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .week-day-header h3 {
   margin: 0;
   font-size: 0.95rem;
@@ -91,10 +146,13 @@
   font-size: 0.8rem;
 }
 
+/* The pushpins stick up above each card, so leave room above the first row and between rows
+   (they'd otherwise sit on the day's heading or on the action buttons of the card above). */
 .week-day-plans {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 12px;
+  gap: 30px 12px;
+  padding-top: 26px;
 }
 
 .plan-card {
@@ -102,7 +160,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 18px 14px 12px;
+  padding: 22px 14px 12px;
   background: #fffaf7;
   border: 1px solid #ead4df;
   border-radius: 6px;
@@ -114,16 +172,18 @@
   transform: rotate(0.6deg);
 }
 
+/* Procreate pushpin, top center, overlapping the card's top edge; the needle lands in
+   the card's top padding, clear of the title. Decorative, so clicks pass through. */
 .plan-pin {
   position: absolute;
-  top: -6px;
+  top: -26px;
   left: 50%;
-  width: 14px;
-  height: 14px;
-  background: radial-gradient(circle at 35% 35%, #f7c6da, #c25a86);
-  border-radius: 50%;
-  box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.25);
+  z-index: 1;
+  width: 44px;
+  height: auto;
+  object-fit: contain;
   transform: translateX(-50%);
+  pointer-events: none;
 }
 
 .plan-date {
@@ -256,9 +316,8 @@
     border-width: 4px;
   }
 
-  .day-card-thumb {
-    width: 24px;
-    height: 24px;
+  .day-card-plus img {
+    width: 32px;
   }
 
   .week-day-plans {
@@ -269,6 +328,14 @@
 @media (prefers-reduced-motion: reduce) {
   .plan-card,
   .plan-card:nth-child(even) {
+    transform: none;
+  }
+
+  .day-card-plus img {
+    transition: none;
+  }
+
+  .day-card-plus:hover img {
     transform: none;
   }
 }

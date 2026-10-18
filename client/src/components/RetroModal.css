@@ -44,7 +44,15 @@
   letter-spacing: 0.5px;
 }
 
+/* 44px tap target; the negative margins keep the header bar its original height. */
 .od-modal-header button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -10px -12px -10px 0;
   border: 0;
   background: transparent;
   color: var(--plum);

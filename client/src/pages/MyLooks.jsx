@@ -56,13 +56,20 @@ export default function MyLooks({ closet, looks, onRemoveLook, onAddPlan, onRest
   // ---------- Detail view: one look, every piece up close ----------
   if (openLook) {
     const pieces = outfitPieces(openLook.itemIds, closet);
+    // A named look shows its name as the title; the aesthetic/weather caption becomes a small
+    // detail, skipped when it's only the defaults Style Me fills in. Unnamed looks are unchanged.
+    const caption = openLook.name
+      ? [openLook.aesthetic, openLook.weather].filter((value) => value && value !== 'My look' && value !== 'any weather').join(' · ')
+      : '';
+    const savedOn = openLook.savedAt ? `Saved ${new Date(openLook.savedAt).toLocaleDateString()}` : '';
+    const details = [caption, savedOn].filter(Boolean).join(' · ');
     return (
       <div className="lookbook-detail">
         <button className="od-secondary-btn" onClick={() => { setOpenLookId(null); setMessage(''); }}>
           ← Back to Lookbook
         </button>
-        <h3>{openLook.aesthetic} · {openLook.weather}</h3>
-        {openLook.savedAt && <p className="lookbook-muted">Saved {new Date(openLook.savedAt).toLocaleDateString()}</p>}
+        <h3>{openLook.name || `${openLook.aesthetic} · ${openLook.weather}`}</h3>
+        {details && <p className="lookbook-muted">{details}</p>}
         {openLook.darling?.request && (
           <blockquote className="lookbook-darling">
             <p>“{openLook.darling.request}”</p>

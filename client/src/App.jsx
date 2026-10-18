@@ -166,6 +166,8 @@ function App() {
       {/* Title artwork with the subtitle centered underneath. The cat mascot (pwa-192x192.png)
           is no longer shown here but is still the favicon and app icon. */}
       <header className="app-header">
+        {/* Decorative flowers on both sides; the left one is mirrored in CSS. Hidden on phones. */}
+        <img src={flowerDecor} alt="" className="app-header-decor app-header-decor-left" />
         <div className="app-header-brand">
           <h1 className="title-wrap">
             <img
@@ -176,6 +178,7 @@ function App() {
           </h1>
           <p className="eyebrow app-header-subtitle">YOUR DIGITAL WARDROBE</p>
         </div>
+        <img src={flowerDecor} alt="" className="app-header-decor" />
       </header>
 
       <main className="app-main">
